@@ -1,0 +1,6113 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>おばけの パンやさん</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --night: #2A1B47;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: var(--night);
+  }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--night);
+    overflow: hidden;
+    -webkit-user-select: none; user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+  #stage { width: 100%; height: 100%; display: block; touch-action: none; }
+  text { font-family: 'Kiwi Maru', 'Hiragino Maru Gothic ProN', 'BIZ UDPGothic', sans-serif; }
+  .a { transform-box: fill-box; transform-origin: center; }
+  .tap { cursor: pointer; }
+  .pulse { animation: pulse 1.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+  @keyframes pulse { 0%,100% { opacity: .25; transform: scale(1); } 50% { opacity: .9; transform: scale(1.06); } }
+  .float { animation: float 2.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  #hand { pointer-events: none; }
+  @media (prefers-reduced-motion: reduce) { .pulse, .float { animation: none; } }
+</style>
+</head>
+<body>
+
+<!-- ================= ゲームデータ(コードから分離) ================= -->
+<script type="application/json" id="game-data">
+{
+ "style": {
+  "ink": "#2A1B47",
+  "glow": "#FFB547",
+  "cream": "#FFE7B8",
+  "dough": "#F7DDB0"
+ },
+ "text": {
+  "title": "おばけの パンやさん",
+  "sub": "パンを つくろう!",
+  "start": "あそぶ",
+  "hello": "こんばんは!",
+  "baking": "やけるかな…",
+  "thanks": "ありがとう!",
+  "row": "すごいね!",
+  "finale": "みんな ありがとう!",
+  "clear": "ぜんぶ できた!",
+  "again": "もういちど",
+  "setDone": "{n}かいめ できた!",
+  "cont": "つづける",
+  "stop": "おしまい",
+  "bye": "またね!"
+ },
+ "places": {
+  "home": [
+   150,
+   540
+  ],
+  "oven": [
+   290,
+   325
+  ],
+  "tool": [
+   292,
+   556
+  ],
+  "customer": [
+   95,
+   262
+  ]
+ },
+ "dropRadius": 85,
+ "toolScale": {
+  "bowl": 1.2,
+  "stem": 1.7,
+  "anko": 1.4,
+  "curry": 1.4
+ },
+ "shopkeeper": {
+  "body": "#FFF8EE",
+  "cheek": "#FFB3C7",
+  "behind": [
+   {
+    "type": "circle",
+    "attrs": {
+     "cx": -13,
+     "cy": -44,
+     "r": 13,
+     "fill": "#FFFFFF",
+     "stroke": "#2A1B47",
+     "stroke-width": 3
+    }
+   },
+   {
+    "type": "circle",
+    "attrs": {
+     "cx": 13,
+     "cy": -44,
+     "r": 13,
+     "fill": "#FFFFFF",
+     "stroke": "#2A1B47",
+     "stroke-width": 3
+    }
+   },
+   {
+    "type": "circle",
+    "attrs": {
+     "cx": 0,
+     "cy": -52,
+     "r": 15,
+     "fill": "#FFFFFF",
+     "stroke": "#2A1B47",
+     "stroke-width": 3
+    }
+   }
+  ],
+  "front": [
+   {
+    "type": "rect",
+    "attrs": {
+     "x": -22,
+     "y": -40,
+     "width": 44,
+     "height": 13,
+     "rx": 4,
+     "fill": "#FFFFFF",
+     "stroke": "#2A1B47",
+     "stroke-width": 3
+    }
+   }
+  ]
+ },
+ "customers": [
+  {
+   "id": "shiro",
+   "body": "#FFF8EE",
+   "cheek": "#FFB3C7",
+   "sticker": "#FF8FB8",
+   "behind": [],
+   "front": []
+  },
+  {
+   "id": "chibi",
+   "size": 0.82,
+   "body": "#DDEFFF",
+   "cheek": "#FFB3C7",
+   "sticker": "#8FD3FF",
+   "behind": [],
+   "front": [
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M0 -30 L-18 -42 L-18 -18 Z",
+      "fill": "#FF6F91",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5,
+      "stroke-linejoin": "round"
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M0 -30 L18 -42 L18 -18 Z",
+      "fill": "#FF6F91",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5,
+      "stroke-linejoin": "round"
+     }
+    },
+    {
+     "type": "circle",
+     "attrs": {
+      "cx": 0,
+      "cy": -30,
+      "r": 6,
+      "fill": "#FF8FB8",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5
+     }
+    }
+   ]
+  },
+  {
+   "id": "orange",
+   "body": "#FFB547",
+   "cheek": "#FF7A6B",
+   "sticker": "#FFE36E",
+   "behind": [],
+   "front": [
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-14 -26 Q-19 -6 -15 12",
+      "fill": "none",
+      "stroke": "#E0892A",
+      "stroke-width": 3,
+      "stroke-linecap": "round"
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M14 -26 Q19 -6 15 12",
+      "fill": "none",
+      "stroke": "#E0892A",
+      "stroke-width": 3,
+      "stroke-linecap": "round"
+     }
+    },
+    {
+     "type": "rect",
+     "attrs": {
+      "x": -5,
+      "y": -42,
+      "width": 10,
+      "height": 14,
+      "rx": 3,
+      "fill": "#6BAA5C",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M4 -36 Q18 -48 22 -32 Q12 -30 4 -36 Z",
+      "fill": "#8CC96E",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5,
+      "stroke-linejoin": "round"
+     }
+    }
+   ]
+  },
+  {
+   "id": "neko",
+   "body": "#DCCFF5",
+   "cheek": "#FFB3C7",
+   "sticker": "#C9B6F2",
+   "behind": [
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-34 -6 L-28 -42 L-6 -26 Z",
+      "fill": "#DCCFF5",
+      "stroke": "#2A1B47",
+      "stroke-width": 3,
+      "stroke-linejoin": "round"
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M34 -6 L28 -42 L6 -26 Z",
+      "fill": "#DCCFF5",
+      "stroke": "#2A1B47",
+      "stroke-width": 3,
+      "stroke-linejoin": "round"
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-27 -14 L-24 -32 L-14 -24 Z",
+      "fill": "#FFB3C7"
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M27 -14 L24 -32 L14 -24 Z",
+      "fill": "#FFB3C7"
+     }
+    }
+   ],
+   "front": [
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-30 12 L-44 8 M-30 17 L-44 19 M30 12 L44 8 M30 17 L44 19",
+      "stroke": "#2A1B47",
+      "stroke-width": 2,
+      "stroke-linecap": "round"
+     }
+    }
+   ]
+  },
+  {
+   "id": "king",
+   "body": "#FFF8EE",
+   "cheek": "#FFB3C7",
+   "sticker": "#FFD84D",
+   "behind": [],
+   "front": [
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-20 -24 L-22 -46 L-10 -36 L0 -50 L10 -36 L22 -46 L20 -24 Z",
+      "fill": "#FFD84D",
+      "stroke": "#2A1B47",
+      "stroke-width": 3,
+      "stroke-linejoin": "round"
+     }
+    },
+    {
+     "type": "circle",
+     "attrs": {
+      "cx": 0,
+      "cy": -32,
+      "r": 4,
+      "fill": "#FF6F91",
+      "stroke": "#2A1B47",
+      "stroke-width": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "kappa",
+   "sticker": "#7CC46A",
+   "shapes": [
+    {
+     "type": "ellipse",
+     "attrs": {
+      "cx": 0,
+      "cy": 22,
+      "rx": 40,
+      "ry": 32,
+      "fill": "#8A6A3A",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-22 6 L-8 -2 L8 -2 L22 6 M-30 26 L-16 16 M30 26 L16 16",
+      "fill": "none",
+      "stroke": "#6A4A2A",
+      "stroke-width": 3
+     }
+    },
+    {
+     "type": "ellipse",
+     "attrs": {
+      "cx": 0,
+      "cy": 36,
+      "rx": 27,
+      "ry": 20,
+      "fill": "#7CC46A",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "type": "circle",
+     "attrs": {
+      "cx": 0,
+      "cy": -2,
+      "r": 32,
+      "fill": "#7CC46A",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-30 -14 L-24 -26 L-16 -20 L-8 -32 L0 -24 L8 -32 L16 -20 L24 -26 L30 -14 Q0 -28 -30 -14 Z",
+      "fill": "#3F7A3A",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5,
+      "stroke-linejoin": "round"
+     }
+    },
+    {
+     "type": "ellipse",
+     "attrs": {
+      "cx": 0,
+      "cy": -30,
+      "rx": 17,
+      "ry": 6,
+      "fill": "#E6F7FF",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5
+     }
+    },
+    {
+     "type": "ellipse",
+     "attrs": {
+      "cx": 0,
+      "cy": 18,
+      "rx": 11,
+      "ry": 6,
+      "fill": "#FFD84D",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5
+     }
+    }
+   ],
+   "face": {
+    "cy": 0,
+    "dx": 12,
+    "mouthY": 17,
+    "cheekDx": 22,
+    "cheekY": 10,
+    "cheek": "#FF9BB0"
+   }
+  },
+  {
+   "id": "tengu",
+   "sticker": "#E8574A",
+   "shapes": [
+    {
+     "type": "ellipse",
+     "attrs": {
+      "cx": 0,
+      "cy": 40,
+      "rx": 30,
+      "ry": 18,
+      "fill": "#F2EBDD",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "type": "circle",
+     "attrs": {
+      "cx": -10,
+      "cy": 32,
+      "r": 4,
+      "fill": "#FF8FB8",
+      "stroke": "#2A1B47",
+      "stroke-width": 1.5
+     }
+    },
+    {
+     "type": "circle",
+     "attrs": {
+      "cx": 10,
+      "cy": 32,
+      "r": 4,
+      "fill": "#FF8FB8",
+      "stroke": "#2A1B47",
+      "stroke-width": 1.5
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-46 8 Q-60 20 -48 36 Q-36 26 -46 8 Z",
+      "fill": "#6BAA5C",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5
+     }
+    },
+    {
+     "type": "rect",
+     "attrs": {
+      "x": -46,
+      "y": 30,
+      "width": 4,
+      "height": 18,
+      "rx": 2,
+      "fill": "#C98A4A",
+      "stroke": "#2A1B47",
+      "stroke-width": 1.5
+     }
+    },
+    {
+     "type": "circle",
+     "attrs": {
+      "cx": 0,
+      "cy": 0,
+      "r": 31,
+      "fill": "#E8574A",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "type": "rect",
+     "attrs": {
+      "x": -10,
+      "y": -42,
+      "width": 20,
+      "height": 14,
+      "rx": 3,
+      "fill": "#2A1B47"
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-20 -14 L-6 -10 M20 -14 L6 -10",
+      "stroke": "#FFFFFF",
+      "stroke-width": 4,
+      "stroke-linecap": "round"
+     }
+    }
+   ],
+   "face": {
+    "cy": -2,
+    "dx": 11,
+    "mouthY": 20,
+    "cheekDx": 0
+   },
+   "over": [
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-3 2 L28 8 Q33 11 28 14 L-3 13 Z",
+      "fill": "#F06A5A",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5,
+      "stroke-linejoin": "round"
+     }
+    }
+   ]
+  },
+  {
+   "id": "karakasa",
+   "sticker": "#FF8FB8",
+   "shapes": [
+    {
+     "type": "rect",
+     "attrs": {
+      "x": -3,
+      "y": 12,
+      "width": 6,
+      "height": 34,
+      "rx": 3,
+      "fill": "#C98A4A",
+      "stroke": "#2A1B47",
+      "stroke-width": 2
+     }
+    },
+    {
+     "type": "rect",
+     "attrs": {
+      "x": -14,
+      "y": 44,
+      "width": 28,
+      "height": 8,
+      "rx": 3,
+      "fill": "#8A5A2A",
+      "stroke": "#2A1B47",
+      "stroke-width": 2
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-48 12 Q-40 -50 0 -52 Q40 -50 48 12 Q36 5 24 12 Q12 5 0 12 Q-12 5 -24 12 Q-36 5 -48 12 Z",
+      "fill": "#FF8FB8",
+      "stroke": "#2A1B47",
+      "stroke-width": 3,
+      "stroke-linejoin": "round"
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M0 -52 L-24 12 M0 -52 L24 12",
+      "stroke": "#E86A94",
+      "stroke-width": 2
+     }
+    },
+    {
+     "type": "circle",
+     "attrs": {
+      "cx": 0,
+      "cy": -54,
+      "r": 4,
+      "fill": "#2A1B47"
+     }
+    }
+   ],
+   "face": {
+    "cy": -20,
+    "one": true,
+    "eye": 8,
+    "mouthY": -2,
+    "cheekDx": 0
+   },
+   "over": [
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-4 0 Q0 18 6 20 Q10 16 6 2 Z",
+      "fill": "#FF6F91",
+      "stroke": "#2A1B47",
+      "stroke-width": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "hitotsume",
+   "sticker": "#6C8FD6",
+   "shapes": [
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-24 22 L24 22 L30 52 L-30 52 Z",
+      "fill": "#6C8FD6",
+      "stroke": "#2A1B47",
+      "stroke-width": 3,
+      "stroke-linejoin": "round"
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M0 22 L-8 36 M0 22 L8 36",
+      "stroke": "#FFFFFF",
+      "stroke-width": 3
+     }
+    },
+    {
+     "type": "circle",
+     "attrs": {
+      "cx": 0,
+      "cy": -6,
+      "r": 31,
+      "fill": "#FFE7C8",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "type": "ellipse",
+     "attrs": {
+      "cx": -8,
+      "cy": -28,
+      "rx": 8,
+      "ry": 4,
+      "fill": "#FFFFFF",
+      "opacity": 0.6
+     }
+    }
+   ],
+   "face": {
+    "cy": -8,
+    "one": true,
+    "eye": 9,
+    "mouthY": 13,
+    "cheekDx": 20,
+    "cheekY": 6
+   },
+   "over": [
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-5 13 Q0 26 5 13 Z",
+      "fill": "#FF6F91",
+      "stroke": "#2A1B47",
+      "stroke-width": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "nurikabe",
+   "sticker": "#B8AFA0",
+   "size": 0.95,
+   "shapes": [
+    {
+     "type": "rect",
+     "attrs": {
+      "x": -34,
+      "y": 48,
+      "width": 16,
+      "height": 10,
+      "rx": 4,
+      "fill": "#8E8576",
+      "stroke": "#2A1B47",
+      "stroke-width": 2
+     }
+    },
+    {
+     "type": "rect",
+     "attrs": {
+      "x": 18,
+      "y": 48,
+      "width": 16,
+      "height": 10,
+      "rx": 4,
+      "fill": "#8E8576",
+      "stroke": "#2A1B47",
+      "stroke-width": 2
+     }
+    },
+    {
+     "type": "rect",
+     "attrs": {
+      "x": -52,
+      "y": -42,
+      "width": 104,
+      "height": 94,
+      "rx": 12,
+      "fill": "#C9C0B0",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-52 -14 L52 -14 M-52 18 L52 18 M-20 -42 L-20 -14 M24 -42 L24 -14 M0 -14 L0 18 M-30 18 L-30 52 M30 18 L30 52",
+      "stroke": "#A89E8C",
+      "stroke-width": 2.5
+     }
+    },
+    {
+     "type": "rect",
+     "attrs": {
+      "x": -64,
+      "y": 0,
+      "width": 14,
+      "height": 10,
+      "rx": 5,
+      "fill": "#C9C0B0",
+      "stroke": "#2A1B47",
+      "stroke-width": 2
+     }
+    },
+    {
+     "type": "rect",
+     "attrs": {
+      "x": 50,
+      "y": 0,
+      "width": 14,
+      "height": 10,
+      "rx": 5,
+      "fill": "#C9C0B0",
+      "stroke": "#2A1B47",
+      "stroke-width": 2
+     }
+    }
+   ],
+   "face": {
+    "cy": 0,
+    "dx": 14,
+    "mouthY": 14,
+    "cheekDx": 26,
+    "cheekY": 10
+   }
+  },
+  {
+   "id": "rokuro",
+   "sticker": "#C9B6F2",
+   "shapes": [
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-26 26 L26 26 L32 54 L-32 54 Z",
+      "fill": "#C9B6F2",
+      "stroke": "#2A1B47",
+      "stroke-width": 3,
+      "stroke-linejoin": "round"
+     }
+    },
+    {
+     "type": "rect",
+     "attrs": {
+      "x": -26,
+      "y": 34,
+      "width": 52,
+      "height": 7,
+      "fill": "#FF8FB8"
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M0 28 Q-26 6 -2 -12 Q16 -26 8 -34",
+      "fill": "none",
+      "stroke": "#2A1B47",
+      "stroke-width": 17,
+      "stroke-linecap": "round"
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M0 28 Q-26 6 -2 -12 Q16 -26 8 -34",
+      "fill": "none",
+      "stroke": "#FFE7C8",
+      "stroke-width": 11,
+      "stroke-linecap": "round"
+     }
+    },
+    {
+     "type": "circle",
+     "attrs": {
+      "cx": 8,
+      "cy": -50,
+      "r": 13,
+      "fill": "#2A1B47"
+     }
+    },
+    {
+     "type": "circle",
+     "attrs": {
+      "cx": 8,
+      "cy": -34,
+      "r": 21,
+      "fill": "#FFE7C8",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-13 -36 Q-10 -54 8 -55 Q26 -54 29 -36 Q18 -46 8 -46 Q-2 -46 -13 -36 Z",
+      "fill": "#2A1B47"
+     }
+    }
+   ],
+   "face": {
+    "cx": 8,
+    "cy": -32,
+    "dx": 7,
+    "eye": 4.5,
+    "mouthY": -23,
+    "cheekDx": 13,
+    "cheekY": -25
+   }
+  },
+  {
+   "id": "nekomata",
+   "sticker": "#FFB76B",
+   "shapes": [
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M20 40 Q52 36 46 6 Q44 -8 54 -14",
+      "fill": "none",
+      "stroke": "#2A1B47",
+      "stroke-width": 11,
+      "stroke-linecap": "round"
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M20 40 Q52 36 46 6 Q44 -8 54 -14",
+      "fill": "none",
+      "stroke": "#FFB76B",
+      "stroke-width": 6,
+      "stroke-linecap": "round"
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-20 40 Q-52 36 -46 6 Q-44 -8 -54 -14",
+      "fill": "none",
+      "stroke": "#2A1B47",
+      "stroke-width": 11,
+      "stroke-linecap": "round"
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-20 40 Q-52 36 -46 6 Q-44 -8 -54 -14",
+      "fill": "none",
+      "stroke": "#FFFFFF",
+      "stroke-width": 6,
+      "stroke-linecap": "round"
+     }
+    },
+    {
+     "type": "ellipse",
+     "attrs": {
+      "cx": 0,
+      "cy": 28,
+      "rx": 28,
+      "ry": 26,
+      "fill": "#FFB76B",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "type": "ellipse",
+     "attrs": {
+      "cx": 0,
+      "cy": 34,
+      "rx": 15,
+      "ry": 15,
+      "fill": "#FFF3E0"
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-26 -14 L-24 -44 L-6 -30 Z M26 -14 L24 -44 L6 -30 Z",
+      "fill": "#FFB76B",
+      "stroke": "#2A1B47",
+      "stroke-width": 3,
+      "stroke-linejoin": "round"
+     }
+    },
+    {
+     "type": "circle",
+     "attrs": {
+      "cx": 0,
+      "cy": -12,
+      "r": 27,
+      "fill": "#FFB76B",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-10 -38 Q0 -30 10 -38",
+      "fill": "none",
+      "stroke": "#E08A3A",
+      "stroke-width": 3,
+      "stroke-linecap": "round"
+     }
+    }
+   ],
+   "face": {
+    "cy": -14,
+    "dx": 10,
+    "eye": 5.5,
+    "mouthY": -3,
+    "cheekDx": 18,
+    "cheekY": -5
+   },
+   "over": [
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-18 -4 L-32 -8 M-18 0 L-32 2 M18 -4 L32 -8 M18 0 L32 2",
+      "stroke": "#2A1B47",
+      "stroke-width": 1.8,
+      "stroke-linecap": "round"
+     }
+    }
+   ]
+  },
+  {
+   "id": "yukionna",
+   "sticker": "#BFE6FF",
+   "shapes": [
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-28 -16 Q-34 30 -24 44 L24 44 Q34 30 28 -16 Q0 -52 -28 -16 Z",
+      "fill": "#2F2A4F",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-22 16 L22 16 L30 54 L-30 54 Z",
+      "fill": "#EAF6FF",
+      "stroke": "#2A1B47",
+      "stroke-width": 3,
+      "stroke-linejoin": "round"
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M0 16 L-10 30 M0 16 L10 30",
+      "stroke": "#8FB8E0",
+      "stroke-width": 2.5
+     }
+    },
+    {
+     "type": "rect",
+     "attrs": {
+      "x": -24,
+      "y": 34,
+      "width": 48,
+      "height": 7,
+      "fill": "#8FD3FF",
+      "stroke": "#2A1B47",
+      "stroke-width": 1.5
+     }
+    },
+    {
+     "type": "circle",
+     "attrs": {
+      "cx": 0,
+      "cy": -14,
+      "r": 22,
+      "fill": "#F4FAFF",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-22 -16 Q-18 -38 0 -38 Q18 -38 22 -16 Q10 -30 0 -26 Q-10 -30 -22 -16 Z",
+      "fill": "#2F2A4F"
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M40 -30 L40 -18 M34 -24 L46 -24 M36 -28 L44 -20 M44 -28 L36 -20",
+      "stroke": "#FFFFFF",
+      "stroke-width": 2,
+      "stroke-linecap": "round"
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-42 6 L-42 16 M-47 11 L-37 11",
+      "stroke": "#FFFFFF",
+      "stroke-width": 2,
+      "stroke-linecap": "round"
+     }
+    }
+   ],
+   "face": {
+    "cy": -12,
+    "dx": 8,
+    "eye": 4.8,
+    "mouthY": -3,
+    "cheekDx": 14,
+    "cheekY": -5,
+    "cheek": "#FFC4D8"
+   }
+  }
+ ],
+ "tools": {
+  "bowl": [
+   {
+    "type": "ellipse",
+    "attrs": {
+     "cx": 0,
+     "cy": -10,
+     "rx": 46,
+     "ry": 12,
+     "fill": "#FF8FB8",
+     "stroke": "#2A1B47",
+     "stroke-width": 3
+    }
+   },
+   {
+    "type": "path",
+    "attrs": {
+     "d": "M-46 -10 Q-44 34 0 36 Q44 34 46 -10 Q0 4 -46 -10 Z",
+     "fill": "#8FD3FF",
+     "stroke": "#2A1B47",
+     "stroke-width": 3,
+     "stroke-linejoin": "round"
+    }
+   },
+   {
+    "type": "ellipse",
+    "attrs": {
+     "cx": -14,
+     "cy": -12,
+     "rx": 10,
+     "ry": 3,
+     "fill": "#FFC4D8"
+    }
+   }
+  ],
+  "stem": [
+   {
+    "type": "rect",
+    "attrs": {
+     "x": -8,
+     "y": -26,
+     "width": 16,
+     "height": 30,
+     "rx": 5,
+     "fill": "#6BAA5C",
+     "stroke": "#2A1B47",
+     "stroke-width": 3
+    }
+   },
+   {
+    "type": "path",
+    "attrs": {
+     "d": "M6 -14 Q30 -32 34 -6 Q16 -2 6 -14 Z",
+     "fill": "#8CC96E",
+     "stroke": "#2A1B47",
+     "stroke-width": 3,
+     "stroke-linejoin": "round"
+    }
+   }
+  ],
+  "ghostCutter": [
+   {
+    "type": "rect",
+    "attrs": {
+     "x": -9,
+     "y": -44,
+     "width": 18,
+     "height": 16,
+     "rx": 5,
+     "fill": "#FF8FB8",
+     "stroke": "#2A1B47",
+     "stroke-width": 3
+    }
+   },
+   {
+    "type": "path",
+    "attrs": {
+     "d": "M-32 -3 A32 32 0 0 1 32 -3 L32 32 Q24 42 16 32 Q8 42 0 32 Q-8 42 -16 32 Q-24 42 -32 32 Z",
+     "fill": "none",
+     "stroke": "#C5D0E0",
+     "stroke-width": 8,
+     "stroke-linejoin": "round"
+    }
+   },
+   {
+    "type": "path",
+    "attrs": {
+     "d": "M-32 -3 A32 32 0 0 1 32 -3 L32 32 Q24 42 16 32 Q8 42 0 32 Q-8 42 -16 32 Q-24 42 -32 32 Z",
+     "fill": "none",
+     "stroke": "#2A1B47",
+     "stroke-width": 2
+    }
+   }
+  ],
+  "starCutter": [
+   {
+    "type": "rect",
+    "attrs": {
+     "x": -9,
+     "y": -50,
+     "width": 18,
+     "height": 14,
+     "rx": 5,
+     "fill": "#FFD84D",
+     "stroke": "#2A1B47",
+     "stroke-width": 3
+    }
+   },
+   {
+    "type": "path",
+    "attrs": {
+     "d": "M0 -42 L11.8 -16.2 L39.9 -13 L19 6.2 L24.7 34 L0 20 L-24.7 34 L-19 6.2 L-39.9 -13 L-11.8 -16.2 Z",
+     "fill": "none",
+     "stroke": "#C5D0E0",
+     "stroke-width": 8,
+     "stroke-linejoin": "round"
+    }
+   },
+   {
+    "type": "path",
+    "attrs": {
+     "d": "M0 -42 L11.8 -16.2 L39.9 -13 L19 6.2 L24.7 34 L0 20 L-24.7 34 L-19 6.2 L-39.9 -13 L-11.8 -16.2 Z",
+     "fill": "none",
+     "stroke": "#2A1B47",
+     "stroke-width": 2,
+     "stroke-linejoin": "round"
+    }
+   }
+  ],
+  "mitten": [
+   {
+    "type": "path",
+    "attrs": {
+     "d": "M-18 -4 Q-20 -30 -8 -34 Q2 -36 4 -26 L6 -16 L14 -24 Q22 -28 24 -18 L10 2 Q4 12 -6 12 Q-18 12 -18 -4 Z",
+     "fill": "#FFFFFF",
+     "stroke": "#2A1B47",
+     "stroke-width": 3,
+     "stroke-linejoin": "round"
+    }
+   },
+   {
+    "type": "rect",
+    "attrs": {
+     "x": -16,
+     "y": 10,
+     "width": 22,
+     "height": 8,
+     "rx": 3,
+     "fill": "#FF8FB8",
+     "stroke": "#2A1B47",
+     "stroke-width": 2.5
+    }
+   }
+  ],
+  "spoon": [
+   {
+    "type": "rect",
+    "attrs": {
+     "x": -4,
+     "y": -62,
+     "width": 8,
+     "height": 48,
+     "rx": 4,
+     "fill": "#C98A4A",
+     "stroke": "#2A1B47",
+     "stroke-width": 2.5
+    }
+   },
+   {
+    "type": "ellipse",
+    "attrs": {
+     "cx": 0,
+     "cy": -8,
+     "rx": 10,
+     "ry": 13,
+     "fill": "#E0A060",
+     "stroke": "#2A1B47",
+     "stroke-width": 2.5
+    }
+   }
+  ],
+  "pin": [
+   {
+    "type": "rect",
+    "attrs": {
+     "x": -68,
+     "y": -5,
+     "width": 20,
+     "height": 10,
+     "rx": 5,
+     "fill": "#C98A4A",
+     "stroke": "#2A1B47",
+     "stroke-width": 2.5
+    }
+   },
+   {
+    "type": "rect",
+    "attrs": {
+     "x": 48,
+     "y": -5,
+     "width": 20,
+     "height": 10,
+     "rx": 5,
+     "fill": "#C98A4A",
+     "stroke": "#2A1B47",
+     "stroke-width": 2.5
+    }
+   },
+   {
+    "type": "rect",
+    "attrs": {
+     "x": -50,
+     "y": -10,
+     "width": 100,
+     "height": 20,
+     "rx": 10,
+     "fill": "#E8B77A",
+     "stroke": "#2A1B47",
+     "stroke-width": 3
+    }
+   },
+   {
+    "type": "rect",
+    "attrs": {
+     "x": -40,
+     "y": -6,
+     "width": 60,
+     "height": 4,
+     "rx": 2,
+     "fill": "#F6D3A2"
+    }
+   }
+  ],
+  "brush": [
+   {
+    "type": "rect",
+    "attrs": {
+     "x": -4,
+     "y": -58,
+     "width": 8,
+     "height": 38,
+     "rx": 4,
+     "fill": "#C98A4A",
+     "stroke": "#2A1B47",
+     "stroke-width": 2.5
+    }
+   },
+   {
+    "type": "rect",
+    "attrs": {
+     "x": -9,
+     "y": -24,
+     "width": 18,
+     "height": 8,
+     "rx": 2,
+     "fill": "#C5D0E0",
+     "stroke": "#2A1B47",
+     "stroke-width": 2
+    }
+   },
+   {
+    "type": "path",
+    "attrs": {
+     "d": "M-11 -16 L11 -16 L10 -2 Q0 3 -10 -2 Z",
+     "fill": "#FFE7B8",
+     "stroke": "#2A1B47",
+     "stroke-width": 2.5,
+     "stroke-linejoin": "round"
+    }
+   }
+  ],
+  "bag": [
+   {
+    "type": "path",
+    "attrs": {
+     "d": "M-18 -56 L18 -56 L4 -6 L-4 -6 Z",
+     "fill": "#FFF8EE"
+    }
+   },
+   {
+    "type": "path",
+    "attrs": {
+     "d": "M-10 -28 L10 -28 L4 -6 L-4 -6 Z",
+     "fill": "#7A4A2C"
+    }
+   },
+   {
+    "type": "path",
+    "attrs": {
+     "d": "M-18 -56 L18 -56 L4 -6 L-4 -6 Z",
+     "fill": "none",
+     "stroke": "#2A1B47",
+     "stroke-width": 2.5,
+     "stroke-linejoin": "round"
+    }
+   },
+   {
+    "type": "path",
+    "attrs": {
+     "d": "M-4 -6 L4 -6 L1.5 0 L-1.5 0 Z",
+     "fill": "#5A3320",
+     "stroke": "#2A1B47",
+     "stroke-width": 1.5
+    }
+   }
+  ],
+  "shaker": [
+   {
+    "type": "rect",
+    "attrs": {
+     "x": -16,
+     "y": -54,
+     "width": 32,
+     "height": 42,
+     "rx": 9,
+     "fill": "#8FD3FF",
+     "stroke": "#2A1B47",
+     "stroke-width": 2.5
+    }
+   },
+   {
+    "type": "rect",
+    "attrs": {
+     "x": -9,
+     "y": -44,
+     "width": 7,
+     "height": 3,
+     "rx": 1.5,
+     "fill": "#FF8FB8"
+    }
+   },
+   {
+    "type": "rect",
+    "attrs": {
+     "x": 2,
+     "y": -36,
+     "width": 7,
+     "height": 3,
+     "rx": 1.5,
+     "fill": "#FFE36E"
+    }
+   },
+   {
+    "type": "rect",
+    "attrs": {
+     "x": -7,
+     "y": -28,
+     "width": 7,
+     "height": 3,
+     "rx": 1.5,
+     "fill": "#FFFFFF"
+    }
+   },
+   {
+    "type": "rect",
+    "attrs": {
+     "x": -18,
+     "y": -14,
+     "width": 36,
+     "height": 14,
+     "rx": 4,
+     "fill": "#FFE7B8",
+     "stroke": "#2A1B47",
+     "stroke-width": 2.5
+    }
+   },
+   {
+    "type": "circle",
+    "attrs": {
+     "cx": -8,
+     "cy": -5,
+     "r": 1.8,
+     "fill": "#2A1B47"
+    }
+   },
+   {
+    "type": "circle",
+    "attrs": {
+     "cx": 0,
+     "cy": -5,
+     "r": 1.8,
+     "fill": "#2A1B47"
+    }
+   },
+   {
+    "type": "circle",
+    "attrs": {
+     "cx": 8,
+     "cy": -5,
+     "r": 1.8,
+     "fill": "#2A1B47"
+    }
+   }
+  ],
+  "cookie": [
+   {
+    "type": "circle",
+    "attrs": {
+     "r": 30,
+     "fill": "#EEF0B8",
+     "stroke": "#2A1B47",
+     "stroke-width": 3
+    }
+   },
+   {
+    "type": "ellipse",
+    "attrs": {
+     "cx": -10,
+     "cy": -12,
+     "rx": 8,
+     "ry": 4,
+     "fill": "#FFFFFF",
+     "opacity": 0.7
+    }
+   }
+  ],
+  "anko": [
+   {
+    "type": "circle",
+    "attrs": {
+     "r": 18,
+     "fill": "#6B3A5A",
+     "stroke": "#2A1B47",
+     "stroke-width": 3
+    }
+   },
+   {
+    "type": "ellipse",
+    "attrs": {
+     "cx": -6,
+     "cy": -7,
+     "rx": 5,
+     "ry": 3,
+     "fill": "#9A6A8A"
+    }
+   }
+  ],
+  "curry": [
+   {
+    "type": "rect",
+    "attrs": {
+     "x": 14,
+     "y": -4,
+     "width": 40,
+     "height": 8,
+     "rx": 4,
+     "fill": "#C98A4A",
+     "stroke": "#2A1B47",
+     "stroke-width": 2.5
+    }
+   },
+   {
+    "type": "ellipse",
+    "attrs": {
+     "cx": 0,
+     "cy": 0,
+     "rx": 20,
+     "ry": 14,
+     "fill": "#E0E6EE",
+     "stroke": "#2A1B47",
+     "stroke-width": 2.5
+    }
+   },
+   {
+    "type": "ellipse",
+    "attrs": {
+     "cx": 0,
+     "cy": -1,
+     "rx": 15,
+     "ry": 9,
+     "fill": "#C98A2A"
+    }
+   },
+   {
+    "type": "circle",
+    "attrs": {
+     "cx": -5,
+     "cy": -2,
+     "r": 2.5,
+     "fill": "#FF8A3D"
+    }
+   },
+   {
+    "type": "circle",
+    "attrs": {
+     "cx": 5,
+     "cy": 1,
+     "r": 2.5,
+     "fill": "#FFE36E"
+    }
+   }
+  ],
+  "crumbs": [
+   {
+    "type": "ellipse",
+    "attrs": {
+     "cx": 0,
+     "cy": -10,
+     "rx": 46,
+     "ry": 12,
+     "fill": "#EAC98A",
+     "stroke": "#2A1B47",
+     "stroke-width": 3
+    }
+   },
+   {
+    "type": "path",
+    "attrs": {
+     "d": "M-46 -10 Q-44 34 0 36 Q44 34 46 -10 Q0 4 -46 -10 Z",
+     "fill": "#C5D0E0",
+     "stroke": "#2A1B47",
+     "stroke-width": 3,
+     "stroke-linejoin": "round"
+    }
+   },
+   {
+    "type": "circle",
+    "attrs": {
+     "cx": -20,
+     "cy": -12,
+     "r": 2,
+     "fill": "#B8863A"
+    }
+   },
+   {
+    "type": "circle",
+    "attrs": {
+     "cx": 6,
+     "cy": -8,
+     "r": 2,
+     "fill": "#B8863A"
+    }
+   },
+   {
+    "type": "circle",
+    "attrs": {
+     "cx": 22,
+     "cy": -13,
+     "r": 2,
+     "fill": "#B8863A"
+    }
+   }
+  ],
+  "fryer": [
+   {
+    "type": "rect",
+    "attrs": {
+     "x": -58,
+     "y": -10,
+     "width": 14,
+     "height": 8,
+     "rx": 4,
+     "fill": "#2A1B47"
+    }
+   },
+   {
+    "type": "rect",
+    "attrs": {
+     "x": 44,
+     "y": -10,
+     "width": 14,
+     "height": 8,
+     "rx": 4,
+     "fill": "#2A1B47"
+    }
+   },
+   {
+    "type": "path",
+    "attrs": {
+     "d": "M-46 -12 L46 -12 L40 32 Q0 40 -40 32 Z",
+     "fill": "#6E7390",
+     "stroke": "#2A1B47",
+     "stroke-width": 3,
+     "stroke-linejoin": "round"
+    }
+   },
+   {
+    "type": "ellipse",
+    "attrs": {
+     "cx": 0,
+     "cy": -12,
+     "rx": 46,
+     "ry": 10,
+     "fill": "#F5C542",
+     "stroke": "#2A1B47",
+     "stroke-width": 3
+    }
+   },
+   {
+    "type": "circle",
+    "attrs": {
+     "cx": -14,
+     "cy": -13,
+     "r": 3,
+     "fill": "#FFF1A8"
+    }
+   },
+   {
+    "type": "circle",
+    "attrs": {
+     "cx": 12,
+     "cy": -10,
+     "r": 2,
+     "fill": "#FFF1A8"
+    }
+   }
+  ],
+  "donburi": [
+   {
+    "type": "ellipse",
+    "attrs": {
+     "cx": 0,
+     "cy": -6,
+     "rx": 46,
+     "ry": 14,
+     "fill": "#8E2F2A",
+     "stroke": "#2A1B47",
+     "stroke-width": 3
+    }
+   },
+   {
+    "type": "path",
+    "attrs": {
+     "d": "M-46 -6 Q-44 34 0 36 Q44 34 46 -6 Q0 10 -46 -6 Z",
+     "fill": "#E8574A",
+     "stroke": "#2A1B47",
+     "stroke-width": 3,
+     "stroke-linejoin": "round"
+    }
+   },
+   {
+    "type": "path",
+    "attrs": {
+     "d": "M-36 14 Q0 26 36 14",
+     "fill": "none",
+     "stroke": "#FFFFFF",
+     "stroke-width": 3,
+     "stroke-dasharray": "6 5"
+    }
+   }
+  ],
+  "ladle": [
+   {
+    "type": "rect",
+    "attrs": {
+     "x": 10,
+     "y": -60,
+     "width": 7,
+     "height": 50,
+     "rx": 3.5,
+     "fill": "#C5D0E0",
+     "stroke": "#2A1B47",
+     "stroke-width": 2.5,
+     "transform": "rotate(20)"
+    }
+   },
+   {
+    "type": "path",
+    "attrs": {
+     "d": "M-16 -18 Q-16 2 0 2 Q16 2 16 -18 Z",
+     "fill": "#C5D0E0",
+     "stroke": "#2A1B47",
+     "stroke-width": 2.5
+    }
+   },
+   {
+    "type": "ellipse",
+    "attrs": {
+     "cx": 0,
+     "cy": -17,
+     "rx": 13,
+     "ry": 4,
+     "fill": "#E8B04A"
+    }
+   }
+  ]
+ },
+ "commonShapes": [
+  {
+   "tag": "blob",
+   "type": "ellipse",
+   "attrs": {
+    "cx": 0,
+    "cy": 6,
+    "rx": 44,
+    "ry": 24,
+    "fill": "#F7DDB0",
+    "stroke": "#2A1B47",
+    "stroke-width": 3
+   }
+  },
+  {
+   "tag": "blob",
+   "type": "ellipse",
+   "attrs": {
+    "cx": -14,
+    "cy": -2,
+    "rx": 10,
+    "ry": 4,
+    "fill": "#FFF3DA"
+   }
+  },
+  {
+   "tag": "ball",
+   "type": "circle",
+   "attrs": {
+    "cx": 0,
+    "cy": 0,
+    "r": 32,
+    "fill": "#F7DDB0",
+    "stroke": "#2A1B47",
+    "stroke-width": 3
+   }
+  },
+  {
+   "tag": "ball",
+   "type": "ellipse",
+   "attrs": {
+    "cx": -11,
+    "cy": -13,
+    "rx": 9,
+    "ry": 5,
+    "fill": "#FFF3DA"
+   }
+  },
+  {
+   "tag": "flat",
+   "type": "ellipse",
+   "attrs": {
+    "cx": 0,
+    "cy": 2,
+    "rx": 48,
+    "ry": 38,
+    "fill": "#F7DDB0",
+    "stroke": "#2A1B47",
+    "stroke-width": 3
+   }
+  },
+  {
+   "tag": "flat",
+   "type": "ellipse",
+   "attrs": {
+    "cx": -18,
+    "cy": -14,
+    "rx": 10,
+    "ry": 4,
+    "fill": "#FFF3DA"
+   }
+  },
+  {
+   "tag": "mix",
+   "type": "ellipse",
+   "attrs": {
+    "cx": -12,
+    "cy": -10,
+    "rx": 20,
+    "ry": 10,
+    "fill": "#FFFFFF",
+    "stroke": "#2A1B47",
+    "stroke-width": 2
+   }
+  },
+  {
+   "tag": "mix",
+   "type": "ellipse",
+   "attrs": {
+    "cx": 17,
+    "cy": -12,
+    "rx": 13,
+    "ry": 8,
+    "fill": "#FFFFFF",
+    "stroke": "#2A1B47",
+    "stroke-width": 2
+   }
+  },
+  {
+   "tag": "mix",
+   "type": "circle",
+   "attrs": {
+    "cx": 17,
+    "cy": -13,
+    "r": 5,
+    "fill": "#FFC93C"
+   }
+  },
+  {
+   "tag": "mix",
+   "type": "rect",
+   "attrs": {
+    "x": -2,
+    "y": -22,
+    "width": 12,
+    "height": 9,
+    "rx": 2,
+    "fill": "#FFE36E",
+    "stroke": "#2A1B47",
+    "stroke-width": 2
+   }
+  }
+ ],
+ "breads": [
+  {
+   "id": "donut",
+   "startTags": [
+    "mix"
+   ],
+   "finalTags": [
+    "ring",
+    "choco",
+    "sprinkle"
+   ],
+   "steps": [
+    {
+     "type": "stir",
+     "say": "ぐるぐる まぜよう",
+     "bowl": true,
+     "turns": 2,
+     "done": {
+      "hide": [
+       "mix"
+      ],
+      "show": [
+       "ball"
+      ]
+     }
+    },
+    {
+     "type": "tap",
+     "say": "ぺちぺち ひらたく",
+     "count": 3,
+     "squash": 0.08,
+     "done": {
+      "hide": [
+       "ball"
+      ],
+      "show": [
+       "disc"
+      ]
+     }
+    },
+    {
+     "type": "hold",
+     "say": "まんなかを ぎゅー",
+     "ms": 1200,
+     "done": {
+      "hide": [
+       "disc"
+      ],
+      "show": [
+       "ring"
+      ]
+     }
+    },
+    {
+     "type": "drag",
+     "say": "やきに いこう!",
+     "to": "oven"
+    },
+    {
+     "type": "bake",
+     "how": "door",
+     "say": "とびらを しめよう"
+    },
+    {
+     "type": "drag",
+     "say": "チョコに ドボン!",
+     "to": "tool",
+     "tool": "bowl",
+     "done": {
+      "show": [
+       "choco"
+      ]
+     }
+    },
+    {
+     "type": "shake",
+     "say": "ふりふり パラパラ",
+     "tag": "sprinkle",
+     "perShake": 1
+    },
+    {
+     "type": "drag",
+     "say": "おばけに わたそう",
+     "to": "customer"
+    }
+   ],
+   "shapes": [
+    {
+     "tag": "disc",
+     "type": "ellipse",
+     "attrs": {
+      "cx": 0,
+      "cy": 0,
+      "rx": 38,
+      "ry": 36,
+      "fill": "#F7DDB0",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "tag": "disc",
+     "type": "circle",
+     "attrs": {
+      "cx": 0,
+      "cy": 0,
+      "r": 6,
+      "fill": "none",
+      "stroke": "#D9B27A",
+      "stroke-width": 2,
+      "stroke-dasharray": "3 3"
+     }
+    },
+    {
+     "tag": "ring",
+     "bake": true,
+     "type": "circle",
+     "attrs": {
+      "cx": 0,
+      "cy": 0,
+      "r": 24,
+      "fill": "none",
+      "stroke": "#D08A45",
+      "stroke-width": 26
+     }
+    },
+    {
+     "tag": "choco",
+     "type": "circle",
+     "attrs": {
+      "cx": 0,
+      "cy": -2,
+      "r": 24,
+      "fill": "none",
+      "stroke": "#FF8FB8",
+      "stroke-width": 19
+     }
+    },
+    {
+     "tag": "sprinkle",
+     "type": "rect",
+     "attrs": {
+      "x": -4,
+      "y": -31,
+      "width": 9,
+      "height": 3.5,
+      "rx": 1.7,
+      "fill": "#FFFFFF",
+      "transform": "rotate(10)"
+     }
+    },
+    {
+     "tag": "sprinkle",
+     "type": "rect",
+     "attrs": {
+      "x": -4,
+      "y": -31,
+      "width": 9,
+      "height": 3.5,
+      "rx": 1.7,
+      "fill": "#FFE36E",
+      "transform": "rotate(190)"
+     }
+    },
+    {
+     "tag": "sprinkle",
+     "type": "rect",
+     "attrs": {
+      "x": -4,
+      "y": -31,
+      "width": 9,
+      "height": 3.5,
+      "rx": 1.7,
+      "fill": "#8FD3FF",
+      "transform": "rotate(100)"
+     }
+    },
+    {
+     "tag": "sprinkle",
+     "type": "rect",
+     "attrs": {
+      "x": -4,
+      "y": -31,
+      "width": 9,
+      "height": 3.5,
+      "rx": 1.7,
+      "fill": "#FFFFFF",
+      "transform": "rotate(280)"
+     }
+    },
+    {
+     "tag": "sprinkle",
+     "type": "rect",
+     "attrs": {
+      "x": -4,
+      "y": -31,
+      "width": 9,
+      "height": 3.5,
+      "rx": 1.7,
+      "fill": "#FFE36E",
+      "transform": "rotate(55)"
+     }
+    },
+    {
+     "tag": "sprinkle",
+     "type": "rect",
+     "attrs": {
+      "x": -4,
+      "y": -31,
+      "width": 9,
+      "height": 3.5,
+      "rx": 1.7,
+      "fill": "#8FD3FF",
+      "transform": "rotate(235)"
+     }
+    },
+    {
+     "tag": "sprinkle",
+     "type": "rect",
+     "attrs": {
+      "x": -4,
+      "y": -31,
+      "width": 9,
+      "height": 3.5,
+      "rx": 1.7,
+      "fill": "#FFFFFF",
+      "transform": "rotate(145)"
+     }
+    },
+    {
+     "tag": "sprinkle",
+     "type": "rect",
+     "attrs": {
+      "x": -4,
+      "y": -31,
+      "width": 9,
+      "height": 3.5,
+      "rx": 1.7,
+      "fill": "#FFE36E",
+      "transform": "rotate(325)"
+     }
+    },
+    {
+     "tag": "ring",
+     "type": "circle",
+     "attrs": {
+      "cx": 0,
+      "cy": 0,
+      "r": 37,
+      "fill": "none",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "tag": "ring",
+     "type": "circle",
+     "attrs": {
+      "cx": 0,
+      "cy": 0,
+      "r": 11,
+      "fill": "none",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    }
+   ],
+   "sound": {
+    "pitch": 1.0,
+    "wave": "sine",
+    "melody": [
+     1047,
+     1319,
+     1568,
+     2093
+    ]
+   }
+  },
+  {
+   "id": "croissant",
+   "startTags": [
+    "blob"
+   ],
+   "finalTags": [
+    "crois",
+    "gloss"
+   ],
+   "steps": [
+    {
+     "type": "rub",
+     "say": "ごしごし こねよう",
+     "amount": 600,
+     "done": {
+      "hide": [
+       "blob"
+      ],
+      "show": [
+       "ball"
+      ]
+     }
+    },
+    {
+     "type": "roll",
+     "say": "めんぼうで のばそう",
+     "amount": 500,
+     "done": {
+      "hide": [
+       "ball"
+      ],
+      "show": [
+       "sheet"
+      ]
+     }
+    },
+    {
+     "type": "flick",
+     "say": "うえに シュッ!",
+     "count": 3,
+     "stages": [
+      {
+       "hide": [
+        "sheet"
+       ],
+       "show": [
+        "roll1"
+       ]
+      },
+      {
+       "hide": [
+        "roll1"
+       ],
+       "show": [
+        "roll2"
+       ]
+      },
+      {
+       "hide": [
+        "roll2"
+       ],
+       "show": [
+        "crois"
+       ]
+      }
+     ]
+    },
+    {
+     "type": "drag",
+     "say": "やきに いこう!",
+     "to": "oven"
+    },
+    {
+     "type": "bake",
+     "how": "dial",
+     "say": "ダイヤルを ぐるぐる",
+     "turns": 1.5
+    },
+    {
+     "type": "brush",
+     "say": "はけで ぬりぬり",
+     "tag": "gloss",
+     "per": 70
+    },
+    {
+     "type": "drag",
+     "say": "おばけに わたそう",
+     "to": "customer"
+    }
+   ],
+   "shapes": [
+    {
+     "tag": "roll1",
+     "type": "path",
+     "attrs": {
+      "d": "M-32 -6 L32 -6 L0 36 Z",
+      "fill": "#F7DDB0",
+      "stroke": "#2A1B47",
+      "stroke-width": 3,
+      "stroke-linejoin": "round"
+     }
+    },
+    {
+     "tag": "roll1",
+     "type": "rect",
+     "attrs": {
+      "x": -40,
+      "y": -20,
+      "width": 80,
+      "height": 18,
+      "rx": 9,
+      "fill": "#F7DDB0",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "tag": "roll2",
+     "type": "path",
+     "attrs": {
+      "d": "M-16 6 L16 6 L0 34 Z",
+      "fill": "#F7DDB0",
+      "stroke": "#2A1B47",
+      "stroke-width": 3,
+      "stroke-linejoin": "round"
+     }
+    },
+    {
+     "tag": "roll2",
+     "type": "rect",
+     "attrs": {
+      "x": -44,
+      "y": -16,
+      "width": 88,
+      "height": 26,
+      "rx": 13,
+      "fill": "#F7DDB0",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "tag": "roll2",
+     "type": "path",
+     "attrs": {
+      "d": "M-30 -3 L30 -3",
+      "stroke": "#D9B27A",
+      "stroke-width": 2.5,
+      "stroke-linecap": "round"
+     }
+    },
+    {
+     "tag": "sheet",
+     "type": "path",
+     "attrs": {
+      "d": "M-46 -30 L46 -30 L0 38 Z",
+      "fill": "#F7DDB0",
+      "stroke": "#2A1B47",
+      "stroke-width": 3,
+      "stroke-linejoin": "round"
+     }
+    },
+    {
+     "tag": "crois",
+     "bake": true,
+     "type": "ellipse",
+     "attrs": {
+      "cx": -36,
+      "cy": 12,
+      "rx": 10,
+      "ry": 13,
+      "transform": "rotate(-45 -36 12)",
+      "fill": "#E39B45",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "tag": "crois",
+     "bake": true,
+     "type": "ellipse",
+     "attrs": {
+      "cx": 36,
+      "cy": 12,
+      "rx": 10,
+      "ry": 13,
+      "transform": "rotate(45 36 12)",
+      "fill": "#E39B45",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "tag": "crois",
+     "bake": true,
+     "type": "ellipse",
+     "attrs": {
+      "cx": -21,
+      "cy": 0,
+      "rx": 14,
+      "ry": 19,
+      "transform": "rotate(-25 -21 0)",
+      "fill": "#E39B45",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "tag": "crois",
+     "bake": true,
+     "type": "ellipse",
+     "attrs": {
+      "cx": 21,
+      "cy": 0,
+      "rx": 14,
+      "ry": 19,
+      "transform": "rotate(25 21 0)",
+      "fill": "#E39B45",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "tag": "crois",
+     "bake": true,
+     "type": "ellipse",
+     "attrs": {
+      "cx": 0,
+      "cy": -5,
+      "rx": 17,
+      "ry": 23,
+      "fill": "#EBAA55",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "tag": "gloss",
+     "type": "ellipse",
+     "attrs": {
+      "cx": -36,
+      "cy": 8,
+      "rx": 3,
+      "ry": 5,
+      "transform": "rotate(-45 -36 8)",
+      "fill": "#FFFFFF",
+      "opacity": 0.75
+     }
+    },
+    {
+     "tag": "gloss",
+     "type": "ellipse",
+     "attrs": {
+      "cx": -24,
+      "cy": -8,
+      "rx": 4,
+      "ry": 7,
+      "transform": "rotate(-25 -24 -8)",
+      "fill": "#FFFFFF",
+      "opacity": 0.75
+     }
+    },
+    {
+     "tag": "gloss",
+     "type": "ellipse",
+     "attrs": {
+      "cx": -5,
+      "cy": -15,
+      "rx": 4,
+      "ry": 8,
+      "fill": "#FFFFFF",
+      "opacity": 0.75
+     }
+    },
+    {
+     "tag": "gloss",
+     "type": "ellipse",
+     "attrs": {
+      "cx": 18,
+      "cy": -8,
+      "rx": 4,
+      "ry": 7,
+      "transform": "rotate(25 18 -8)",
+      "fill": "#FFFFFF",
+      "opacity": 0.75
+     }
+    },
+    {
+     "tag": "gloss",
+     "type": "ellipse",
+     "attrs": {
+      "cx": 33,
+      "cy": 8,
+      "rx": 3,
+      "ry": 5,
+      "transform": "rotate(45 33 8)",
+      "fill": "#FFFFFF",
+      "opacity": 0.75
+     }
+    }
+   ],
+   "sound": {
+    "pitch": 0.84,
+    "wave": "triangle",
+    "melody": [
+     784,
+     988,
+     1175,
+     1568,
+     1175
+    ]
+   }
+  },
+  {
+   "id": "pumpkin",
+   "startTags": [
+    "blob"
+   ],
+   "finalTags": [
+    "pball",
+    "line",
+    "stem"
+   ],
+   "steps": [
+    {
+     "type": "rub",
+     "say": "ごしごし こねよう",
+     "amount": 600,
+     "done": {
+      "hide": [
+       "blob"
+      ],
+      "show": [
+       "ball"
+      ]
+     }
+    },
+    {
+     "type": "stir",
+     "say": "ぐるぐる まるめよう",
+     "turns": 2,
+     "done": {
+      "hide": [
+       "ball"
+      ],
+      "show": [
+       "pball"
+      ]
+     }
+    },
+    {
+     "type": "path",
+     "say": "へらで なぞろう",
+     "guides": [
+      "M-28 -22 Q-38 4 -28 32",
+      "M-10 -28 Q-15 4 -10 37",
+      "M10 -28 Q15 4 10 37",
+      "M28 -22 Q38 4 28 32"
+     ],
+     "color": "#C9A06A",
+     "width": 4,
+     "done": {
+      "show": [
+       "line"
+      ]
+     }
+    },
+    {
+     "type": "drag",
+     "say": "やきに いこう!",
+     "to": "oven"
+    },
+    {
+     "type": "bake",
+     "how": "fire",
+     "say": "とんとん ひを つけよう",
+     "count": 3
+    },
+    {
+     "type": "place",
+     "say": "へたを のせよう",
+     "tool": "stem",
+     "done": {
+      "show": [
+       "stem"
+      ]
+     }
+    },
+    {
+     "type": "drag",
+     "say": "おばけに わたそう",
+     "to": "customer"
+    }
+   ],
+   "shapes": [
+    {
+     "tag": "pball",
+     "bake": true,
+     "type": "ellipse",
+     "attrs": {
+      "cx": 0,
+      "cy": 4,
+      "rx": 44,
+      "ry": 34,
+      "fill": "#F29A38",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "tag": "line",
+     "type": "path",
+     "attrs": {
+      "d": "M-28 -22 Q-38 4 -28 32",
+      "fill": "none",
+      "stroke": "#C4631C",
+      "stroke-width": 3,
+      "stroke-linecap": "round"
+     },
+     "rawAttrs": {
+      "stroke": "#D9B27A"
+     }
+    },
+    {
+     "tag": "line",
+     "type": "path",
+     "attrs": {
+      "d": "M-10 -28 Q-15 4 -10 37",
+      "fill": "none",
+      "stroke": "#C4631C",
+      "stroke-width": 3,
+      "stroke-linecap": "round"
+     },
+     "rawAttrs": {
+      "stroke": "#D9B27A"
+     }
+    },
+    {
+     "tag": "line",
+     "type": "path",
+     "attrs": {
+      "d": "M10 -28 Q15 4 10 37",
+      "fill": "none",
+      "stroke": "#C4631C",
+      "stroke-width": 3,
+      "stroke-linecap": "round"
+     },
+     "rawAttrs": {
+      "stroke": "#D9B27A"
+     }
+    },
+    {
+     "tag": "line",
+     "type": "path",
+     "attrs": {
+      "d": "M28 -22 Q38 4 28 32",
+      "fill": "none",
+      "stroke": "#C4631C",
+      "stroke-width": 3,
+      "stroke-linecap": "round"
+     },
+     "rawAttrs": {
+      "stroke": "#D9B27A"
+     }
+    },
+    {
+     "tag": "stem",
+     "type": "rect",
+     "attrs": {
+      "x": -6,
+      "y": -44,
+      "width": 12,
+      "height": 18,
+      "rx": 4,
+      "fill": "#6BAA5C",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "tag": "stem",
+     "type": "path",
+     "attrs": {
+      "d": "M4 -36 Q22 -50 26 -30 Q12 -26 4 -36 Z",
+      "fill": "#8CC96E",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5,
+      "stroke-linejoin": "round"
+     }
+    }
+   ],
+   "sound": {
+    "pitch": 0.7,
+    "wave": "square",
+    "melody": [
+     523,
+     659,
+     784,
+     659,
+     1047
+    ]
+   }
+  },
+  {
+   "id": "ghostbread",
+   "startTags": [
+    "mix"
+   ],
+   "finalTags": [
+    "gbody",
+    "face",
+    "gcheek"
+   ],
+   "steps": [
+    {
+     "type": "stir",
+     "say": "ぐるぐる まぜよう",
+     "bowl": true,
+     "turns": 2,
+     "done": {
+      "hide": [
+       "mix"
+      ],
+      "show": [
+       "ball"
+      ]
+     }
+    },
+    {
+     "type": "roll",
+     "say": "めんぼうで のばそう",
+     "amount": 500,
+     "done": {
+      "hide": [
+       "ball"
+      ],
+      "show": [
+       "flat"
+      ]
+     }
+    },
+    {
+     "type": "place",
+     "say": "おばけがたで ぽん!",
+     "tool": "ghostCutter",
+     "done": {
+      "hide": [
+       "flat"
+      ],
+      "show": [
+       "gbody"
+      ]
+     }
+    },
+    {
+     "type": "drag",
+     "say": "やきに いこう!",
+     "to": "oven"
+    },
+    {
+     "type": "bake",
+     "how": "button",
+     "say": "ボタンを ぎゅー",
+     "ms": 1300
+    },
+    {
+     "type": "path",
+     "say": "チョコペンで かこう",
+     "guides": [
+      "M-13 -16 L-13 -3",
+      "M13 -16 L13 -3",
+      "M-12 12 Q0 24 12 12"
+     ],
+     "color": "#5A3320",
+     "width": 5,
+     "done": {
+      "show": [
+       "face",
+       "gcheek"
+      ]
+     }
+    },
+    {
+     "type": "drag",
+     "say": "おばけに わたそう",
+     "to": "customer"
+    }
+   ],
+   "shapes": [
+    {
+     "tag": "gbody",
+     "bake": true,
+     "type": "path",
+     "attrs": {
+      "d": "M-34 -4 A34 34 0 0 1 34 -4 L34 32 Q25 44 17 32 Q8 44 0 32 Q-8 44 -17 32 Q-25 44 -34 32 Z",
+      "fill": "#EFC98A",
+      "stroke": "#2A1B47",
+      "stroke-width": 3,
+      "stroke-linejoin": "round"
+     }
+    },
+    {
+     "tag": "gcheek",
+     "type": "ellipse",
+     "attrs": {
+      "cx": -22,
+      "cy": 6,
+      "rx": 6,
+      "ry": 3.5,
+      "fill": "#FF9BB0"
+     }
+    },
+    {
+     "tag": "gcheek",
+     "type": "ellipse",
+     "attrs": {
+      "cx": 22,
+      "cy": 6,
+      "rx": 6,
+      "ry": 3.5,
+      "fill": "#FF9BB0"
+     }
+    },
+    {
+     "tag": "face",
+     "type": "path",
+     "attrs": {
+      "d": "M-13 -16 L-13 -3",
+      "fill": "none",
+      "stroke": "#5A3320",
+      "stroke-width": 5,
+      "stroke-linecap": "round"
+     }
+    },
+    {
+     "tag": "face",
+     "type": "path",
+     "attrs": {
+      "d": "M13 -16 L13 -3",
+      "fill": "none",
+      "stroke": "#5A3320",
+      "stroke-width": 5,
+      "stroke-linecap": "round"
+     }
+    },
+    {
+     "tag": "face",
+     "type": "path",
+     "attrs": {
+      "d": "M-12 12 Q0 24 12 12",
+      "fill": "none",
+      "stroke": "#5A3320",
+      "stroke-width": 5,
+      "stroke-linecap": "round"
+     }
+    }
+   ],
+   "sound": {
+    "pitch": 1.15,
+    "wave": "sine",
+    "melody": [
+     880,
+     831,
+     784,
+     1175
+    ],
+    "wobble": true
+   }
+  },
+  {
+   "id": "star",
+   "startTags": [
+    "blob"
+   ],
+   "finalTags": [
+    "starb",
+    "bead"
+   ],
+   "steps": [
+    {
+     "type": "rub",
+     "say": "ごしごし こねよう",
+     "amount": 600,
+     "done": {
+      "hide": [
+       "blob"
+      ],
+      "show": [
+       "ball"
+      ]
+     }
+    },
+    {
+     "type": "tap",
+     "say": "ぺちぺち ひらたく",
+     "count": 3,
+     "squash": 0.08,
+     "done": {
+      "hide": [
+       "ball"
+      ],
+      "show": [
+       "flat"
+      ]
+     }
+    },
+    {
+     "type": "place",
+     "say": "ほしがたで ぽん!",
+     "tool": "starCutter",
+     "done": {
+      "hide": [
+       "flat"
+      ],
+      "show": [
+       "starb"
+      ]
+     }
+    },
+    {
+     "type": "drag",
+     "say": "やきに いこう!",
+     "to": "oven"
+    },
+    {
+     "type": "bake",
+     "how": "lever",
+     "say": "レバーを したへ"
+    },
+    {
+     "type": "spots",
+     "say": "ぽちぽち かざろう",
+     "tag": "bead",
+     "spots": [
+      [
+       0,
+       -27
+      ],
+      [
+       26,
+       -9
+      ],
+      [
+       16,
+       21
+      ],
+      [
+       -16,
+       21
+      ],
+      [
+       -26,
+       -9
+      ]
+     ]
+    },
+    {
+     "type": "drag",
+     "say": "おばけに わたそう",
+     "to": "customer"
+    }
+   ],
+   "shapes": [
+    {
+     "tag": "starb",
+     "bake": true,
+     "type": "path",
+     "attrs": {
+      "d": "M0 -42 L11.8 -16.2 L39.9 -13 L19 6.2 L24.7 34 L0 20 L-24.7 34 L-19 6.2 L-39.9 -13 L-11.8 -16.2 Z",
+      "fill": "#E8B04A",
+      "stroke": "#2A1B47",
+      "stroke-width": 3,
+      "stroke-linejoin": "round"
+     }
+    },
+    {
+     "tag": "bead",
+     "type": "circle",
+     "attrs": {
+      "cx": 0,
+      "cy": -27,
+      "r": 5,
+      "fill": "#E6EEF7",
+      "stroke": "#2A1B47",
+      "stroke-width": 1.5
+     }
+    },
+    {
+     "tag": "bead",
+     "type": "circle",
+     "attrs": {
+      "cx": 26,
+      "cy": -9,
+      "r": 5,
+      "fill": "#E6EEF7",
+      "stroke": "#2A1B47",
+      "stroke-width": 1.5
+     }
+    },
+    {
+     "tag": "bead",
+     "type": "circle",
+     "attrs": {
+      "cx": 16,
+      "cy": 21,
+      "r": 5,
+      "fill": "#E6EEF7",
+      "stroke": "#2A1B47",
+      "stroke-width": 1.5
+     }
+    },
+    {
+     "tag": "bead",
+     "type": "circle",
+     "attrs": {
+      "cx": -16,
+      "cy": 21,
+      "r": 5,
+      "fill": "#E6EEF7",
+      "stroke": "#2A1B47",
+      "stroke-width": 1.5
+     }
+    },
+    {
+     "tag": "bead",
+     "type": "circle",
+     "attrs": {
+      "cx": -26,
+      "cy": -9,
+      "r": 5,
+      "fill": "#E6EEF7",
+      "stroke": "#2A1B47",
+      "stroke-width": 1.5
+     }
+    }
+   ],
+   "sound": {
+    "pitch": 1.45,
+    "wave": "sine",
+    "melody": [
+     1568,
+     2093,
+     2637,
+     3136,
+     2637,
+     3136
+    ]
+   }
+  },
+  {
+   "id": "melon",
+   "startTags": [
+    "blob"
+   ],
+   "finalTags": [
+    "mbody",
+    "cookie",
+    "grid",
+    "sugar"
+   ],
+   "sound": {
+    "pitch": 1.1,
+    "wave": "triangle",
+    "melody": [
+     988,
+     1319,
+     1175,
+     1568
+    ]
+   },
+   "steps": [
+    {
+     "type": "rub",
+     "say": "ごしごし こねよう",
+     "amount": 600,
+     "done": {
+      "hide": [
+       "blob"
+      ],
+      "show": [
+       "ball"
+      ]
+     }
+    },
+    {
+     "type": "place",
+     "say": "クッキーを かぶせよう",
+     "tool": "cookie",
+     "done": {
+      "hide": [
+       "ball"
+      ],
+      "show": [
+       "mbody",
+       "cookie"
+      ]
+     }
+    },
+    {
+     "type": "path",
+     "say": "へらで なぞろう",
+     "guides": [
+      "M-26 -10 L10 28",
+      "M-12 -28 L26 14",
+      "M26 -10 L-10 28",
+      "M12 -28 L-26 14"
+     ],
+     "color": "#C7C07A",
+     "width": 3,
+     "done": {
+      "show": [
+       "grid"
+      ]
+     }
+    },
+    {
+     "type": "drag",
+     "say": "やきに いこう!",
+     "to": "oven"
+    },
+    {
+     "type": "bake",
+     "how": "dial",
+     "say": "ダイヤルを ぐるぐる",
+     "turns": 1.5
+    },
+    {
+     "type": "shake",
+     "say": "ふりふり おさとう",
+     "tag": "sugar",
+     "perShake": 1
+    },
+    {
+     "type": "drag",
+     "say": "おばけに わたそう",
+     "to": "customer"
+    }
+   ],
+   "shapes": [
+    {
+     "tag": "mbody",
+     "type": "circle",
+     "attrs": {
+      "cx": 0,
+      "cy": 2,
+      "r": 38,
+      "fill": "#E8A94A",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     },
+     "bake": true
+    },
+    {
+     "tag": "cookie",
+     "type": "circle",
+     "attrs": {
+      "cx": 0,
+      "cy": -2,
+      "r": 34,
+      "fill": "#D9D66A",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5
+     },
+     "rawAttrs": {
+      "fill": "#EEF0B8"
+     }
+    },
+    {
+     "tag": "grid",
+     "type": "path",
+     "attrs": {
+      "d": "M-26 -10 L10 28",
+      "fill": "none",
+      "stroke": "#A89E3A",
+      "stroke-width": 3,
+      "stroke-linecap": "round"
+     },
+     "rawAttrs": {
+      "stroke": "#C7C07A"
+     }
+    },
+    {
+     "tag": "grid",
+     "type": "path",
+     "attrs": {
+      "d": "M-12 -28 L26 14",
+      "fill": "none",
+      "stroke": "#A89E3A",
+      "stroke-width": 3,
+      "stroke-linecap": "round"
+     },
+     "rawAttrs": {
+      "stroke": "#C7C07A"
+     }
+    },
+    {
+     "tag": "grid",
+     "type": "path",
+     "attrs": {
+      "d": "M26 -10 L-10 28",
+      "fill": "none",
+      "stroke": "#A89E3A",
+      "stroke-width": 3,
+      "stroke-linecap": "round"
+     },
+     "rawAttrs": {
+      "stroke": "#C7C07A"
+     }
+    },
+    {
+     "tag": "grid",
+     "type": "path",
+     "attrs": {
+      "d": "M12 -28 L-26 14",
+      "fill": "none",
+      "stroke": "#A89E3A",
+      "stroke-width": 3,
+      "stroke-linecap": "round"
+     },
+     "rawAttrs": {
+      "stroke": "#C7C07A"
+     }
+    },
+    {
+     "tag": "sugar",
+     "type": "circle",
+     "attrs": {
+      "cx": -18,
+      "cy": -18,
+      "r": 2.5,
+      "fill": "#FFFFFF"
+     }
+    },
+    {
+     "tag": "sugar",
+     "type": "circle",
+     "attrs": {
+      "cx": 4,
+      "cy": -24,
+      "r": 2.5,
+      "fill": "#FFFFFF"
+     }
+    },
+    {
+     "tag": "sugar",
+     "type": "circle",
+     "attrs": {
+      "cx": 20,
+      "cy": -12,
+      "r": 2.5,
+      "fill": "#FFFFFF"
+     }
+    },
+    {
+     "tag": "sugar",
+     "type": "circle",
+     "attrs": {
+      "cx": -24,
+      "cy": 4,
+      "r": 2.5,
+      "fill": "#FFFFFF"
+     }
+    },
+    {
+     "tag": "sugar",
+     "type": "circle",
+     "attrs": {
+      "cx": 0,
+      "cy": -4,
+      "r": 2.5,
+      "fill": "#FFFFFF"
+     }
+    },
+    {
+     "tag": "sugar",
+     "type": "circle",
+     "attrs": {
+      "cx": 22,
+      "cy": 10,
+      "r": 2.5,
+      "fill": "#FFFFFF"
+     }
+    },
+    {
+     "tag": "sugar",
+     "type": "circle",
+     "attrs": {
+      "cx": -10,
+      "cy": 18,
+      "r": 2.5,
+      "fill": "#FFFFFF"
+     }
+    },
+    {
+     "tag": "sugar",
+     "type": "circle",
+     "attrs": {
+      "cx": 10,
+      "cy": 22,
+      "r": 2.5,
+      "fill": "#FFFFFF"
+     }
+    }
+   ]
+  },
+  {
+   "id": "anpan",
+   "startTags": [
+    "mix"
+   ],
+   "finalTags": [
+    "abody",
+    "goma"
+   ],
+   "sound": {
+    "pitch": 0.9,
+    "wave": "sine",
+    "melody": [
+     659,
+     784,
+     988,
+     784,
+     1319
+    ]
+   },
+   "steps": [
+    {
+     "type": "stir",
+     "say": "ぐるぐる まぜよう",
+     "bowl": true,
+     "turns": 2,
+     "done": {
+      "hide": [
+       "mix"
+      ],
+      "show": [
+       "ball"
+      ]
+     }
+    },
+    {
+     "type": "tap",
+     "say": "ぺちぺち ひらたく",
+     "count": 3,
+     "squash": 0.08,
+     "done": {
+      "hide": [
+       "ball"
+      ],
+      "show": [
+       "flat"
+      ]
+     }
+    },
+    {
+     "type": "place",
+     "say": "あんこを のせよう",
+     "tool": "anko",
+     "done": {
+      "show": [
+       "anko"
+      ]
+     }
+    },
+    {
+     "type": "hold",
+     "say": "ぎゅー つつもう",
+     "ms": 1200,
+     "done": {
+      "hide": [
+       "flat",
+       "anko"
+      ],
+      "show": [
+       "abody"
+      ]
+     }
+    },
+    {
+     "type": "drag",
+     "say": "やきに いこう!",
+     "to": "oven"
+    },
+    {
+     "type": "bake",
+     "how": "fire",
+     "say": "とんとん ひを つけよう",
+     "count": 3
+    },
+    {
+     "type": "spots",
+     "say": "ごまで かおを つけよう",
+     "tag": "goma",
+     "spots": [
+      [
+       -13,
+       -6
+      ],
+      [
+       13,
+       -6
+      ],
+      [
+       0,
+       10
+      ]
+     ]
+    },
+    {
+     "type": "drag",
+     "say": "おばけに わたそう",
+     "to": "customer"
+    }
+   ],
+   "shapes": [
+    {
+     "tag": "anko",
+     "type": "circle",
+     "attrs": {
+      "cx": 0,
+      "cy": 0,
+      "r": 18,
+      "fill": "#6B3A5A",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5
+     }
+    },
+    {
+     "tag": "abody",
+     "type": "ellipse",
+     "attrs": {
+      "cx": 0,
+      "cy": 2,
+      "rx": 42,
+      "ry": 35,
+      "fill": "#D0803A",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     },
+     "bake": true
+    },
+    {
+     "tag": "abody",
+     "type": "ellipse",
+     "attrs": {
+      "cx": -16,
+      "cy": -18,
+      "rx": 10,
+      "ry": 5,
+      "fill": "#FFFFFF",
+      "opacity": 0.35
+     }
+    },
+    {
+     "tag": "goma",
+     "type": "ellipse",
+     "attrs": {
+      "cx": -13,
+      "cy": -6,
+      "rx": 3.5,
+      "ry": 5,
+      "fill": "#2A1B47"
+     }
+    },
+    {
+     "tag": "goma",
+     "type": "ellipse",
+     "attrs": {
+      "cx": 13,
+      "cy": -6,
+      "rx": 3.5,
+      "ry": 5,
+      "fill": "#2A1B47"
+     }
+    },
+    {
+     "tag": "goma",
+     "type": "ellipse",
+     "attrs": {
+      "cx": 0,
+      "cy": 10,
+      "rx": 4,
+      "ry": 5,
+      "fill": "#2A1B47"
+     }
+    }
+   ]
+  },
+  {
+   "id": "cornet",
+   "startTags": [
+    "blob"
+   ],
+   "finalTags": [
+    "spiral",
+    "choco2"
+   ],
+   "sound": {
+    "pitch": 1.3,
+    "wave": "triangle",
+    "melody": [
+     1175,
+     1047,
+     1319,
+     1568,
+     2093
+    ]
+   },
+   "steps": [
+    {
+     "type": "rub",
+     "say": "ごしごし こねよう",
+     "amount": 600,
+     "done": {
+      "hide": [
+       "blob"
+      ],
+      "show": [
+       "ball"
+      ]
+     }
+    },
+    {
+     "type": "roll",
+     "say": "めんぼうで のばそう",
+     "amount": 500,
+     "done": {
+      "hide": [
+       "ball"
+      ],
+      "show": [
+       "rope",
+       "cone"
+      ]
+     }
+    },
+    {
+     "type": "stir",
+     "say": "つつに ぐるぐる まこう",
+     "turns": 2,
+     "tag": "spiral",
+     "noSpin": true,
+     "done": {
+      "hide": [
+       "rope",
+       "cone"
+      ]
+     }
+    },
+    {
+     "type": "drag",
+     "say": "やきに いこう!",
+     "to": "oven"
+    },
+    {
+     "type": "bake",
+     "how": "lever",
+     "say": "レバーを したへ"
+    },
+    {
+     "type": "hold",
+     "say": "チョコを ぎゅー",
+     "ms": 1300,
+     "follower": "bag",
+     "done": {
+      "show": [
+       "choco2"
+      ]
+     }
+    },
+    {
+     "type": "drag",
+     "say": "おばけに わたそう",
+     "to": "customer"
+    }
+   ],
+   "shapes": [
+    {
+     "tag": "cone",
+     "type": "path",
+     "attrs": {
+      "d": "M40 -26 L-40 0 L40 26 Z",
+      "fill": "#C5D0E0",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5,
+      "stroke-linejoin": "round"
+     }
+    },
+    {
+     "tag": "rope",
+     "type": "rect",
+     "attrs": {
+      "x": -46,
+      "y": 30,
+      "width": 92,
+      "height": 14,
+      "rx": 7,
+      "fill": "#F7DDB0",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5
+     }
+    },
+    {
+     "tag": "spiral",
+     "type": "ellipse",
+     "attrs": {
+      "cx": -26,
+      "cy": 0,
+      "rx": 8,
+      "ry": 10,
+      "fill": "#D9923C",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5
+     },
+     "bake": true
+    },
+    {
+     "tag": "spiral",
+     "type": "ellipse",
+     "attrs": {
+      "cx": -15,
+      "cy": 0,
+      "rx": 9,
+      "ry": 15,
+      "fill": "#D9923C",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5
+     },
+     "bake": true
+    },
+    {
+     "tag": "spiral",
+     "type": "ellipse",
+     "attrs": {
+      "cx": -2,
+      "cy": 0,
+      "rx": 10,
+      "ry": 19,
+      "fill": "#D9923C",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5
+     },
+     "bake": true
+    },
+    {
+     "tag": "spiral",
+     "type": "ellipse",
+     "attrs": {
+      "cx": 12,
+      "cy": 0,
+      "rx": 11,
+      "ry": 23,
+      "fill": "#D9923C",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5
+     },
+     "bake": true
+    },
+    {
+     "tag": "spiral",
+     "type": "ellipse",
+     "attrs": {
+      "cx": 26,
+      "cy": 0,
+      "rx": 12,
+      "ry": 26,
+      "fill": "#D9923C",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5
+     },
+     "bake": true
+    },
+    {
+     "tag": "choco2",
+     "type": "ellipse",
+     "attrs": {
+      "cx": 34,
+      "cy": 0,
+      "rx": 9,
+      "ry": 20,
+      "fill": "#5A3320",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5
+     }
+    },
+    {
+     "tag": "choco2",
+     "type": "path",
+     "attrs": {
+      "d": "M34 -10 Q42 -4 34 2 Q28 8 36 12",
+      "fill": "none",
+      "stroke": "#8A5A3A",
+      "stroke-width": 2.5,
+      "stroke-linecap": "round"
+     }
+    }
+   ]
+  },
+  {
+   "id": "curry",
+   "startTags": [
+    "blob"
+   ],
+   "finalTags": [
+    "cbody",
+    "crumb"
+   ],
+   "sound": {
+    "pitch": 0.8,
+    "wave": "sawtooth",
+    "melody": [
+     523,
+     622,
+     784,
+     932,
+     1047
+    ]
+   },
+   "steps": [
+    {
+     "type": "rub",
+     "say": "ごしごし こねよう",
+     "amount": 600,
+     "done": {
+      "hide": [
+       "blob"
+      ],
+      "show": [
+       "ball"
+      ]
+     }
+    },
+    {
+     "type": "tap",
+     "say": "ぺちぺち ひらたく",
+     "count": 3,
+     "squash": 0.08,
+     "done": {
+      "hide": [
+       "ball"
+      ],
+      "show": [
+       "flat"
+      ]
+     }
+    },
+    {
+     "type": "place",
+     "say": "カレーを のせよう",
+     "tool": "curry",
+     "done": {
+      "show": [
+       "curryin"
+      ]
+     }
+    },
+    {
+     "type": "flick",
+     "say": "うえに シュッ! つつもう",
+     "count": 2,
+     "stages": [
+      {
+       "hide": [
+        "flat",
+        "curryin"
+       ],
+       "show": [
+        "fold1"
+       ]
+      },
+      {
+       "hide": [
+        "fold1"
+       ],
+       "show": [
+        "cbody"
+       ]
+      }
+     ]
+    },
+    {
+     "type": "drag",
+     "say": "パンこに ドボン!",
+     "to": "tool",
+     "tool": "crumbs",
+     "effect": "crumb",
+     "done": {
+      "show": [
+       "crumb"
+      ]
+     }
+    },
+    {
+     "type": "drag",
+     "say": "あげよう! じゅわー",
+     "to": "tool",
+     "tool": "fryer",
+     "effect": "fry"
+    },
+    {
+     "type": "drag",
+     "say": "おばけに わたそう",
+     "to": "customer"
+    }
+   ],
+   "shapes": [
+    {
+     "tag": "curryin",
+     "type": "ellipse",
+     "attrs": {
+      "cx": 0,
+      "cy": 0,
+      "rx": 20,
+      "ry": 13,
+      "fill": "#C98A2A",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5
+     }
+    },
+    {
+     "tag": "curryin",
+     "type": "circle",
+     "attrs": {
+      "cx": -6,
+      "cy": -2,
+      "r": 3,
+      "fill": "#FF8A3D"
+     }
+    },
+    {
+     "tag": "curryin",
+     "type": "circle",
+     "attrs": {
+      "cx": 7,
+      "cy": 2,
+      "r": 3,
+      "fill": "#FFE36E"
+     }
+    },
+    {
+     "tag": "fold1",
+     "type": "path",
+     "attrs": {
+      "d": "M-46 0 Q-44 -34 0 -34 Q44 -34 46 0 Z",
+      "fill": "#F7DDB0",
+      "stroke": "#2A1B47",
+      "stroke-width": 3,
+      "stroke-linejoin": "round"
+     }
+    },
+    {
+     "tag": "fold1",
+     "type": "path",
+     "attrs": {
+      "d": "M-46 0 Q0 30 46 0",
+      "fill": "#EAD0A0",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "tag": "cbody",
+     "type": "path",
+     "attrs": {
+      "d": "M-46 6 Q-44 -30 0 -32 Q44 -30 46 6 Q0 26 -46 6 Z",
+      "fill": "#D9923C",
+      "stroke": "#2A1B47",
+      "stroke-width": 3,
+      "stroke-linejoin": "round"
+     },
+     "bake": true
+    },
+    {
+     "tag": "cbody",
+     "type": "path",
+     "attrs": {
+      "d": "M-40 6 Q0 20 40 6",
+      "fill": "none",
+      "stroke": "#2A1B47",
+      "stroke-width": 2,
+      "stroke-dasharray": "3 4"
+     }
+    },
+    {
+     "tag": "crumb",
+     "type": "circle",
+     "attrs": {
+      "cx": -30,
+      "cy": -8,
+      "r": 2.2,
+      "fill": "#A8641E"
+     },
+     "rawAttrs": {
+      "fill": "#EAC98A"
+     }
+    },
+    {
+     "tag": "crumb",
+     "type": "circle",
+     "attrs": {
+      "cx": -18,
+      "cy": -20,
+      "r": 2.2,
+      "fill": "#A8641E"
+     },
+     "rawAttrs": {
+      "fill": "#EAC98A"
+     }
+    },
+    {
+     "tag": "crumb",
+     "type": "circle",
+     "attrs": {
+      "cx": -4,
+      "cy": -26,
+      "r": 2.2,
+      "fill": "#A8641E"
+     },
+     "rawAttrs": {
+      "fill": "#EAC98A"
+     }
+    },
+    {
+     "tag": "crumb",
+     "type": "circle",
+     "attrs": {
+      "cx": 12,
+      "cy": -22,
+      "r": 2.2,
+      "fill": "#A8641E"
+     },
+     "rawAttrs": {
+      "fill": "#EAC98A"
+     }
+    },
+    {
+     "tag": "crumb",
+     "type": "circle",
+     "attrs": {
+      "cx": 26,
+      "cy": -12,
+      "r": 2.2,
+      "fill": "#A8641E"
+     },
+     "rawAttrs": {
+      "fill": "#EAC98A"
+     }
+    },
+    {
+     "tag": "crumb",
+     "type": "circle",
+     "attrs": {
+      "cx": -22,
+      "cy": 2,
+      "r": 2.2,
+      "fill": "#A8641E"
+     },
+     "rawAttrs": {
+      "fill": "#EAC98A"
+     }
+    },
+    {
+     "tag": "crumb",
+     "type": "circle",
+     "attrs": {
+      "cx": -6,
+      "cy": -8,
+      "r": 2.2,
+      "fill": "#A8641E"
+     },
+     "rawAttrs": {
+      "fill": "#EAC98A"
+     }
+    },
+    {
+     "tag": "crumb",
+     "type": "circle",
+     "attrs": {
+      "cx": 8,
+      "cy": -4,
+      "r": 2.2,
+      "fill": "#A8641E"
+     },
+     "rawAttrs": {
+      "fill": "#EAC98A"
+     }
+    },
+    {
+     "tag": "crumb",
+     "type": "circle",
+     "attrs": {
+      "cx": 20,
+      "cy": 0,
+      "r": 2.2,
+      "fill": "#A8641E"
+     },
+     "rawAttrs": {
+      "fill": "#EAC98A"
+     }
+    },
+    {
+     "tag": "crumb",
+     "type": "circle",
+     "attrs": {
+      "cx": 32,
+      "cy": -2,
+      "r": 2.2,
+      "fill": "#A8641E"
+     },
+     "rawAttrs": {
+      "fill": "#EAC98A"
+     }
+    },
+    {
+     "tag": "crumb",
+     "type": "circle",
+     "attrs": {
+      "cx": 0,
+      "cy": 8,
+      "r": 2.2,
+      "fill": "#A8641E"
+     },
+     "rawAttrs": {
+      "fill": "#EAC98A"
+     }
+    }
+   ]
+  },
+  {
+   "id": "ramen",
+   "special": true,
+   "startTags": [
+    "blob"
+   ],
+   "finalTags": [
+    "bowlR",
+    "soup",
+    "noodleB",
+    "top"
+   ],
+   "sound": {
+    "pitch": 0.6,
+    "wave": "square",
+    "melody": [
+     392,
+     523,
+     659,
+     784,
+     659,
+     1047
+    ]
+   },
+   "steps": [
+    {
+     "type": "rub",
+     "say": "ごしごし こねよう",
+     "amount": 600,
+     "done": {
+      "hide": [
+       "blob"
+      ],
+      "show": [
+       "ball"
+      ]
+     }
+    },
+    {
+     "type": "roll",
+     "say": "めんぼうで のばそう",
+     "amount": 500,
+     "done": {
+      "hide": [
+       "ball"
+      ],
+      "show": [
+       "sheetR"
+      ]
+     }
+    },
+    {
+     "type": "path",
+     "say": "ほうちょうで きろう",
+     "guides": [
+      "M-26 -26 L-26 26",
+      "M-9 -26 L-9 26",
+      "M9 -26 L9 26",
+      "M26 -26 L26 26"
+     ],
+     "color": "#B8925A",
+     "width": 3,
+     "done": {
+      "hide": [
+       "sheetR"
+      ],
+      "show": [
+       "noodle"
+      ]
+     }
+    },
+    {
+     "type": "stir",
+     "say": "ぐるぐる ゆでよう",
+     "pot": true,
+     "turns": 2
+    },
+    {
+     "type": "drag",
+     "say": "どんぶりへ いれよう",
+     "to": "tool",
+     "tool": "donburi",
+     "effect": "plop",
+     "done": {
+      "hide": [
+       "noodle"
+      ],
+      "show": [
+       "bowlR",
+       "noodleB"
+      ]
+     }
+    },
+    {
+     "type": "hold",
+     "say": "スープを そそごう",
+     "ms": 1300,
+     "follower": "ladle",
+     "done": {
+      "show": [
+       "soup"
+      ]
+     }
+    },
+    {
+     "type": "spots",
+     "say": "ぐを のせよう",
+     "tag": "top",
+     "spots": [
+      [
+       -22,
+       -10
+      ],
+      [
+       14,
+       -11
+      ],
+      [
+       32,
+       -24
+      ],
+      [
+       -2,
+       -4
+      ]
+     ]
+    },
+    {
+     "type": "drag",
+     "say": "ふたりに わたそう",
+     "to": "customer"
+    }
+   ],
+   "shapes": [
+    {
+     "tag": "sheetR",
+     "type": "rect",
+     "attrs": {
+      "x": -40,
+      "y": -30,
+      "width": 80,
+      "height": 60,
+      "rx": 8,
+      "fill": "#F7DDB0",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "tag": "noodle",
+     "type": "path",
+     "attrs": {
+      "d": "M-24 -30 Q-30 -15 -24 0 T-24 30",
+      "fill": "none",
+      "stroke": "#F3D98A",
+      "stroke-width": 6,
+      "stroke-linecap": "round"
+     }
+    },
+    {
+     "tag": "noodle",
+     "type": "path",
+     "attrs": {
+      "d": "M-12 -30 Q-18 -15 -12 0 T-12 30",
+      "fill": "none",
+      "stroke": "#F3D98A",
+      "stroke-width": 6,
+      "stroke-linecap": "round"
+     }
+    },
+    {
+     "tag": "noodle",
+     "type": "path",
+     "attrs": {
+      "d": "M0 -30 Q-6 -15 0 0 T0 30",
+      "fill": "none",
+      "stroke": "#F3D98A",
+      "stroke-width": 6,
+      "stroke-linecap": "round"
+     }
+    },
+    {
+     "tag": "noodle",
+     "type": "path",
+     "attrs": {
+      "d": "M12 -30 Q6 -15 12 0 T12 30",
+      "fill": "none",
+      "stroke": "#F3D98A",
+      "stroke-width": 6,
+      "stroke-linecap": "round"
+     }
+    },
+    {
+     "tag": "noodle",
+     "type": "path",
+     "attrs": {
+      "d": "M24 -30 Q18 -15 24 0 T24 30",
+      "fill": "none",
+      "stroke": "#F3D98A",
+      "stroke-width": 6,
+      "stroke-linecap": "round"
+     }
+    },
+    {
+     "tag": "bowlR",
+     "type": "ellipse",
+     "attrs": {
+      "cx": 0,
+      "cy": -6,
+      "rx": 46,
+      "ry": 14,
+      "fill": "#8E2F2A",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "tag": "soup",
+     "type": "ellipse",
+     "attrs": {
+      "cx": 0,
+      "cy": -5,
+      "rx": 42,
+      "ry": 11,
+      "fill": "#E8B04A"
+     }
+    },
+    {
+     "tag": "noodleB",
+     "type": "path",
+     "attrs": {
+      "d": "M-34 -9 Q-24 -15 -14 -9 T6 -9 T26 -9",
+      "fill": "none",
+      "stroke": "#F6E3A0",
+      "stroke-width": 4,
+      "stroke-linecap": "round"
+     }
+    },
+    {
+     "tag": "noodleB",
+     "type": "path",
+     "attrs": {
+      "d": "M-34 -3 Q-24 -9 -14 -3 T6 -3 T26 -3",
+      "fill": "none",
+      "stroke": "#F6E3A0",
+      "stroke-width": 4,
+      "stroke-linecap": "round"
+     }
+    },
+    {
+     "tag": "top",
+     "type": "circle",
+     "attrs": {
+      "cx": -22,
+      "cy": -10,
+      "r": 8,
+      "fill": "#FFFFFF",
+      "stroke": "#2A1B47",
+      "stroke-width": 2
+     }
+    },
+    {
+     "tag": "top",
+     "type": "ellipse",
+     "attrs": {
+      "cx": 14,
+      "cy": -11,
+      "rx": 10,
+      "ry": 7,
+      "fill": "#FFFFFF",
+      "stroke": "#2A1B47",
+      "stroke-width": 2
+     }
+    },
+    {
+     "tag": "top",
+     "type": "rect",
+     "attrs": {
+      "x": 26,
+      "y": -40,
+      "width": 13,
+      "height": 26,
+      "rx": 2,
+      "fill": "#2F4A3A",
+      "stroke": "#2A1B47",
+      "stroke-width": 2
+     }
+    },
+    {
+     "tag": "top",
+     "type": "circle",
+     "attrs": {
+      "cx": -2,
+      "cy": -4,
+      "r": 4,
+      "fill": "#7CC46A",
+      "stroke": "#2A1B47",
+      "stroke-width": 1.5
+     }
+    },
+    {
+     "tag": "bowlR",
+     "type": "path",
+     "attrs": {
+      "d": "M-46 -6 Q-44 34 0 36 Q44 34 46 -6 Q0 10 -46 -6 Z",
+      "fill": "#E8574A",
+      "stroke": "#2A1B47",
+      "stroke-width": 3,
+      "stroke-linejoin": "round"
+     }
+    },
+    {
+     "tag": "bowlR",
+     "type": "path",
+     "attrs": {
+      "d": "M-36 14 Q0 26 36 14",
+      "fill": "none",
+      "stroke": "#FFFFFF",
+      "stroke-width": 3,
+      "stroke-dasharray": "6 5"
+     }
+    }
+   ]
+  }
+ ],
+ "specialCustomers": [
+  {
+   "id": "zombies",
+   "size": 0.8,
+   "sticker": "#9ED39A",
+   "hello": "ラーメン ください!",
+   "shapes": [
+    {
+     "type": "rect",
+     "attrs": {
+      "x": -50,
+      "y": 8,
+      "width": 42,
+      "height": 40,
+      "rx": 10,
+      "fill": "#7A6FB5",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "type": "rect",
+     "attrs": {
+      "x": -12,
+      "y": 16,
+      "width": 26,
+      "height": 10,
+      "rx": 5,
+      "fill": "#9ED39A",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5
+     }
+    },
+    {
+     "type": "rect",
+     "attrs": {
+      "x": -52,
+      "y": -38,
+      "width": 46,
+      "height": 46,
+      "rx": 15,
+      "fill": "#9ED39A",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-52 -24 Q-52 -40 -36 -40 L-22 -40 Q-6 -40 -6 -24 L-14 -30 L-22 -24 L-30 -31 L-38 -24 L-46 -30 Z",
+      "fill": "#4E7A4A",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5,
+      "stroke-linejoin": "round"
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M-44 -16 L-36 -16 M-42 -19 L-42 -13 M-38 -19 L-38 -13",
+      "stroke": "#2A1B47",
+      "stroke-width": 1.8,
+      "stroke-linecap": "round"
+     }
+    },
+    {
+     "type": "rect",
+     "attrs": {
+      "x": 8,
+      "y": 8,
+      "width": 42,
+      "height": 40,
+      "rx": 14,
+      "fill": "#FF8FB8",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "type": "rect",
+     "attrs": {
+      "x": -6,
+      "y": 20,
+      "width": 20,
+      "height": 9,
+      "rx": 4.5,
+      "fill": "#B6E0A6",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5
+     }
+    },
+    {
+     "type": "rect",
+     "attrs": {
+      "x": 6,
+      "y": -36,
+      "width": 44,
+      "height": 44,
+      "rx": 17,
+      "fill": "#B6E0A6",
+      "stroke": "#2A1B47",
+      "stroke-width": 3
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M6 -18 Q4 -40 28 -40 Q52 -40 50 -18 Q40 -30 28 -28 Q16 -30 6 -18 Z",
+      "fill": "#6A4A3A",
+      "stroke": "#2A1B47",
+      "stroke-width": 2.5,
+      "stroke-linejoin": "round"
+     }
+    },
+    {
+     "type": "path",
+     "attrs": {
+      "d": "M42 -40 L54 -48 L54 -32 Z M42 -40 L30 -48 L30 -32 Z",
+      "fill": "#FF6F91",
+      "stroke": "#2A1B47",
+      "stroke-width": 2,
+      "stroke-linejoin": "round"
+     }
+    },
+    {
+     "type": "rect",
+     "attrs": {
+      "x": 34,
+      "y": -6,
+      "width": 12,
+      "height": 6,
+      "rx": 2,
+      "fill": "#FFE7C8",
+      "stroke": "#2A1B47",
+      "stroke-width": 1.5,
+      "transform": "rotate(-20 40 -3)"
+     }
+    }
+   ],
+   "faces": {
+    "smile": [
+     {
+      "type": "circle",
+      "attrs": {
+       "cx": -38,
+       "cy": -12,
+       "r": 4,
+       "fill": "#2A1B47"
+      }
+     },
+     {
+      "type": "circle",
+      "attrs": {
+       "cx": -20,
+       "cy": -12,
+       "r": 4,
+       "fill": "#2A1B47"
+      }
+     },
+     {
+      "type": "path",
+      "attrs": {
+       "d": "M-35 -2 Q-29 4 -23 -2",
+       "fill": "none",
+       "stroke": "#2A1B47",
+       "stroke-width": 2.5,
+       "stroke-linecap": "round"
+      }
+     },
+     {
+      "type": "circle",
+      "attrs": {
+       "cx": 20,
+       "cy": -12,
+       "r": 4,
+       "fill": "#2A1B47"
+      }
+     },
+     {
+      "type": "circle",
+      "attrs": {
+       "cx": 36,
+       "cy": -12,
+       "r": 4,
+       "fill": "#2A1B47"
+      }
+     },
+     {
+      "type": "ellipse",
+      "attrs": {
+       "cx": 14,
+       "cy": -3,
+       "rx": 4,
+       "ry": 2.5,
+       "fill": "#FF9BB0"
+      }
+     },
+     {
+      "type": "path",
+      "attrs": {
+       "d": "M23 -2 Q28 3 33 -2",
+       "fill": "none",
+       "stroke": "#2A1B47",
+       "stroke-width": 2.5,
+       "stroke-linecap": "round"
+      }
+     }
+    ],
+    "happy": [
+     {
+      "type": "path",
+      "attrs": {
+       "d": "M-42 -11 Q-38 -17 -34 -11 M-24 -11 Q-20 -17 -16 -11",
+       "fill": "none",
+       "stroke": "#2A1B47",
+       "stroke-width": 2.5,
+       "stroke-linecap": "round"
+      }
+     },
+     {
+      "type": "path",
+      "attrs": {
+       "d": "M-36 -3 Q-29 8 -22 -3 Z",
+       "fill": "#C2455E",
+       "stroke": "#2A1B47",
+       "stroke-width": 2,
+       "stroke-linejoin": "round"
+      }
+     },
+     {
+      "type": "path",
+      "attrs": {
+       "d": "M16 -11 Q20 -17 24 -11 M32 -11 Q36 -17 40 -11",
+       "fill": "none",
+       "stroke": "#2A1B47",
+       "stroke-width": 2.5,
+       "stroke-linecap": "round"
+      }
+     },
+     {
+      "type": "ellipse",
+      "attrs": {
+       "cx": 14,
+       "cy": -3,
+       "rx": 4,
+       "ry": 2.5,
+       "fill": "#FF9BB0"
+      }
+     },
+     {
+      "type": "path",
+      "attrs": {
+       "d": "M22 -3 Q28 8 34 -3 Z",
+       "fill": "#C2455E",
+       "stroke": "#2A1B47",
+       "stroke-width": 2,
+       "stroke-linejoin": "round"
+      }
+     }
+    ]
+   }
+  }
+ ],
+ "zombieChance": 0.5,
+ "sets": 3,
+ "perSet": 5,
+ "rush": {
+  "seconds": 10,
+  "hello": "いっぱい ください!",
+  "say": "ごしごし いっぱい!",
+  "go": "スタート!",
+  "end": "おしまい!",
+  "count": "{n}こ!",
+  "best": "さいこうきろく {n}こ",
+  "newBest": "しんきろく!",
+  "perRub": 45,
+  "levels": [
+   0,
+   15,
+   35,
+   60,
+   90,
+   130,
+   180,
+   240,
+   300,
+   350
+  ],
+  "levelUp": "レベルアップ!"
+ }
+}
+</script>
+
+
+<svg id="stage" viewBox="0 0 360 640" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" aria-label="おばけの パンやさん">
+  <rect x="-400" y="-200" width="1160" height="1040" fill="#43295F"/>
+  <!-- まど -->
+  <g>
+    <rect x="262" y="118" width="78" height="92" rx="39" fill="#1C1133" stroke="#2A1B47" stroke-width="3"/>
+    <circle cx="312" cy="150" r="14" fill="#FFE7B8"/>
+    <circle cx="318" cy="145" r="12" fill="#1C1133"/>
+    <circle cx="284" cy="140" r="2" fill="#FFE7B8"/>
+    <circle cx="296" cy="186" r="1.6" fill="#FFE7B8"/>
+    <circle cx="322" cy="190" r="2.2" fill="#FFE7B8"/>
+  </g>
+  <!-- ドア -->
+  <g>
+    <rect x="28" y="150" width="96" height="200" rx="46" fill="#5B3A7A" stroke="#2A1B47" stroke-width="3"/>
+    <rect x="42" y="166" width="68" height="170" rx="34" fill="#6C4890"/>
+    <circle cx="106" cy="262" r="5" fill="#FFB547" stroke="#2A1B47" stroke-width="2"/>
+  </g>
+  <!-- オーブン -->
+  <g id="oven">
+    <rect id="ovenRing" x="229" y="253" width="122" height="156" rx="24" fill="none" stroke="#FFE7B8" stroke-width="4" class="pulse" style="display:none"/>
+    <g id="ovenBody" class="a">
+      <rect x="238" y="262" width="104" height="138" rx="18" fill="#C9573A" stroke="#2A1B47" stroke-width="3"/>
+      <rect x="262" y="276" width="56" height="7" rx="3.5" fill="#2A1B47"/>
+      <rect x="252" y="292" width="76" height="64" rx="14" fill="#3A2140" stroke="#2A1B47" stroke-width="3"/>
+      <g id="ovenFire"></g>
+      <g id="ovenBread" transform="translate(290,326) scale(.55)"></g>
+      <rect id="ovenGlow" x="255" y="295" width="70" height="58" rx="12" fill="#FFB547" opacity="0.15"/>
+      <rect id="ovenGlass" x="258" y="297" width="18" height="40" rx="8" fill="#FFFFFF" opacity=".18" style="display:none"/>
+      <circle cx="268" cy="378" r="7" fill="#FFE7B8" stroke="#2A1B47" stroke-width="2.5"/>
+      <circle cx="312" cy="378" r="7" fill="#FFE7B8" stroke="#2A1B47" stroke-width="2.5"/>
+      <g id="ovenBtn" transform="translate(268,378)" style="display:none"><g id="ovenBtnA" class="a"><circle r="13" fill="#FF6F91" stroke="#2A1B47" stroke-width="3"/><circle cx="-3" cy="-4" r="3.5" fill="#FFC4D8"/></g></g>
+      <g id="dial" transform="translate(312,378)" style="display:none"><circle r="15" fill="#FFE7B8" stroke="#2A1B47" stroke-width="3"/><g id="dialRot"><rect x="-2.5" y="-13" width="5" height="12" rx="2.5" fill="#2A1B47"/></g></g>
+      <g id="lever" transform="translate(334,318)" style="display:none"><g id="leverArm" transform="rotate(-15)"><rect x="-3.5" y="-32" width="7" height="32" rx="3.5" fill="#C5D0E0" stroke="#2A1B47" stroke-width="2"/><circle cy="-34" r="9" fill="#FF6F91" stroke="#2A1B47" stroke-width="2.5"/></g><circle r="6" fill="#2A1B47"/></g>
+      <g id="ovenDoor" style="display:none"><g id="ovenDoorA" class="a" style="transform-origin: 50% 0%"><rect x="252" y="356" width="76" height="56" rx="10" fill="#B04A30" stroke="#2A1B47" stroke-width="3"/><rect x="278" y="396" width="24" height="7" rx="3.5" fill="#2A1B47"/></g></g>
+    </g>
+  </g>
+  <!-- シール台紙 -->
+  <g id="board">
+    <rect x="16" y="14" width="328" height="92" rx="18" fill="#2A1B47" stroke="#FFE7B8" stroke-width="2" stroke-opacity=".5"/>
+  </g>
+  <!-- カウンター -->
+  <rect x="-400" y="452" width="1160" height="400" fill="#8B4E2B"/>
+  <rect x="-400" y="448" width="1160" height="16" fill="#B06A3C"/>
+  <!-- メッセージ -->
+  <text id="msg" x="180" y="432" text-anchor="middle" font-size="28" fill="#FFE7B8"></text>
+  <!-- お客さん -->
+  <g transform="translate(95,262)">
+    <circle id="custRing" r="62" fill="none" stroke="#FFE7B8" stroke-width="4" class="pulse" style="display:none"/>
+    <g id="custAnim" class="a" opacity="0">
+      <g class="float"><g id="custGfx" transform="scale(1.3)"></g></g>
+    </g>
+  </g>
+  <!-- ふきだし -->
+  <g transform="translate(205,172)">
+    <g id="bubble" class="a" opacity="0">
+      <path d="M-44 14 L-70 40 L-30 26 Z" fill="#FFF8EE" stroke="#2A1B47" stroke-width="3" stroke-linejoin="round"/>
+      <rect x="-48" y="-40" width="96" height="80" rx="24" fill="#FFF8EE" stroke="#2A1B47" stroke-width="3"/>
+      <rect x="-46" y="10" width="20" height="18" fill="#FFF8EE"/>
+      <g id="bubbleBread" transform="scale(.8)"></g>
+    </g>
+  </g>
+  <g id="dots"></g>
+  <!-- パン -->
+  <g id="breadLayer" transform="translate(150,540)" >
+    <circle id="breadRing" r="60" fill="none" stroke="#FFE7B8" stroke-width="4" class="pulse" style="display:none"/>
+    <circle id="holdRing" r="56" fill="none" stroke="#FFB547" stroke-width="7" stroke-linecap="round" transform="rotate(-90)" style="display:none"/>
+    <circle r="64" fill="transparent"/>
+    <g id="underGfx" transform="scale(1.25)"></g>
+    <g id="breadAnim" class="a"><g id="breadGfx" transform="scale(1.25)"></g></g>
+    <g id="overGfx" transform="scale(1.25)"></g>
+  </g>
+  <!-- どうぐ(データから描く) -->
+  <g id="toolLayer" transform="translate(292,556)" class="tap" style="display:none">
+    <circle id="toolRing" r="58" fill="none" stroke="#FFE7B8" stroke-width="4" class="pulse"/>
+    <circle r="60" fill="transparent"/>
+    <g id="toolAnim" class="a"><g id="toolGfx" transform="scale(1.2)"></g></g>
+  </g>
+  <g id="fx"></g>
+  <!-- 手や道具(ゆびについてくる) -->
+  <g id="follower" style="display:none; pointer-events:none"><g id="folAnim" class="a"><g id="followerGfx" transform="scale(1.2)"></g></g></g>
+  <!-- おてほんの指 -->
+  <g id="hand" style="display:none">
+    <g id="handAnim" class="a">
+      <circle r="16" fill="#FFFFFF" opacity=".55"/>
+      <circle r="22" fill="none" stroke="#FFFFFF" stroke-width="2.5" opacity=".5"/>
+    </g>
+  </g>
+
+  <!-- タイトル -->
+  <g id="titleScreen" class="tap">
+    <rect x="-400" y="-200" width="1160" height="1040" fill="#2A1B47" opacity=".94"/>
+    <g transform="translate(180,190)"><g class="float"><g id="titleGhost" transform="scale(1.8)"></g></g></g>
+    <text id="titleText" x="180" y="318" text-anchor="middle" font-size="34" fill="#FFE7B8"></text>
+    <text id="subText" x="180" y="360" text-anchor="middle" font-size="19" fill="#FFE7B8" opacity=".85"></text>
+    <g id="startBtn">
+      <rect x="95" y="410" width="170" height="70" rx="35" fill="#FFB547" stroke="#2A1B47" stroke-width="3"/>
+      <text id="startText" x="180" y="456" text-anchor="middle" font-size="30" fill="#2A1B47"></text>
+    </g>
+  </g>
+
+  <!-- セットのくぎり -->
+  <g id="setScreen" style="display:none">
+    <rect x="-400" y="-200" width="1160" height="1040" fill="#2A1B47" opacity=".92"/>
+    <text id="setText" x="180" y="200" text-anchor="middle" font-size="38" fill="#FFE7B8"></text>
+    <g id="setGhosts"></g>
+    <g id="contBtn" class="tap">
+      <rect x="85" y="400" width="190" height="70" rx="35" fill="#FFB547" stroke="#2A1B47" stroke-width="3"/>
+      <text id="contText" x="180" y="446" text-anchor="middle" font-size="28" fill="#2A1B47"></text>
+    </g>
+    <g id="stopBtn" class="tap">
+      <rect x="110" y="496" width="140" height="54" rx="27" fill="none" stroke="#FFE7B8" stroke-width="3"/>
+      <text id="stopText" x="180" y="532" text-anchor="middle" font-size="22" fill="#FFE7B8"></text>
+    </g>
+  </g>
+
+  <!-- おしまい -->
+  <g id="endScreen" class="tap" style="display:none">
+    <rect x="-400" y="-200" width="1160" height="1040" fill="#2A1B47" opacity=".9"/>
+    <text id="clearText" x="180" y="250" text-anchor="middle" font-size="46" fill="#FFE7B8"></text>
+    <g id="againBtn">
+      <rect x="85" y="400" width="190" height="70" rx="35" fill="#FFB547" stroke="#2A1B47" stroke-width="3"/>
+      <text id="againText" x="180" y="446" text-anchor="middle" font-size="28" fill="#2A1B47"></text>
+    </g>
+  </g>
+</svg>
+
+<script>
+(() => {
+  const DATA = JSON.parse(document.getElementById('game-data').textContent);
+  const S = DATA.style, T = DATA.text;
+  const P = {}; for (const k in DATA.places) P[k] = { x: DATA.places[k][0], y: DATA.places[k][1] };
+  const NS = 'http://www.w3.org/2000/svg';
+  const $ = id => document.getElementById(id);
+  const svg = $('stage');
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const byId = (list, id) => list.find(x => x.id === id);
+  const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+  const SC = 1.25; // パンの絵の拡大率
+  // オーブンの部品の位置(絵と対応)
+  const OV = { door: { x: 290, y: 386 }, knob: { x: 312, y: 378 }, btn: { x: 268, y: 378 }, lever: { x: 346, y: 290 }, leverDown: { x: 346, y: 352 }, body: { x: 290, y: 330 } };
+  const toB = p => ({ x: (p.x - P.home.x) / SC, y: (p.y - P.home.y) / SC });
+  const toS = b => ({ x: P.home.x + b.x * SC, y: P.home.y + b.y * SC });
+
+  function el(tag, attrs = {}, parent) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  const clear = g => { while (g.firstChild) g.removeChild(g.firstChild); };
+  function anim(node, frames, opts) {
+    node.getAnimations().forEach(a => a.cancel());
+    // 透明度を指定しないアニメは必ず「見える」状態にする(消えたままになるのを防ぐ)
+    frames = frames.map(f => ('opacity' in f) ? f : Object.assign({}, f, { opacity: 1 }));
+    return node.animate(frames, Object.assign({ fill: 'forwards' }, opts)).finished;
+  }
+  const show = (id, on) => $(id).style.display = on ? '' : 'none';
+  const raise = node => node.parentNode.insertBefore(node, $('fx'));
+  const setPos = (node, p) => node.setAttribute('transform', `translate(${p.x},${p.y})`);
+  function svgPt(e) {
+    const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
+    const r = p.matrixTransform(svg.getScreenCTM().inverse());
+    return { x: r.x, y: r.y };
+  }
+
+  /* ---------------- 注文リスト(3周・周ごとにパンが入れかわる) ---------------- */
+  const COLS = DATA.perSet || 5, SETS = DATA.sets;
+  const ALL_CUSTOMERS = DATA.customers.concat(DATA.specialCustomers || []);
+  const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  // 1セット5人。パンはセットごとにランダム(セット内でかぶらない)。ゾンビ夫婦はときどき来る
+  function makeOrders() {
+    const normal = DATA.breads.filter(b => !b.special);
+    const out = []; let zombieSeen = false;
+    for (let set = 0; set < SETS; set++) {
+      const pool = shuffle(normal.slice());
+      const guests = shuffle(DATA.customers.slice()).slice(0, COLS);
+      let z = -1;
+      if (DATA.specialCustomers && (Math.random() < DATA.zombieChance || (set === SETS - 1 && !zombieSeen))) {
+        z = 1 + ((Math.random() * (COLS - 2)) | 0); zombieSeen = true; // 2〜4人目
+      }
+      guests.forEach((c, i) => out.push(
+        i === COLS - 1 && DATA.rush ? { customer: c.id, bread: 'rush' } :      // 5人目は「いっぱい ください!」
+        i === z ? { customer: DATA.specialCustomers[0].id, bread: 'ramen' } :
+        { customer: c.id, bread: pool[i % pool.length].id }));
+    }
+    return out;
+  }
+  // テスト用: ?orders=melon,ramen,... で注文を固定できる
+  const FIXED = new URLSearchParams(location.search).get('orders');
+  if (FIXED) DATA.orders = FIXED.split(',').map((b, i) => b === 'ramen'
+    ? { customer: DATA.specialCustomers[0].id, bread: 'ramen' }
+    : { customer: DATA.customers[i % DATA.customers.length].id, bread: b });
+  // (rush も ?orders= で指定できる)
+  let ORDERS = DATA.orders || makeOrders();
+  const RUSH_POOL = DATA.breads.filter(b => !b.special);
+
+  /* ---------------- 絵 ---------------- */
+  const GHOST = 'M-36 6 A36 36 0 0 1 36 6 L36 44 Q27 56 18 44 Q9 56 0 44 Q-9 56 -18 44 Q-27 56 -36 44 Z';
+  const drawShapes = (g, shapes) => (shapes || []).forEach(s => el(s.type, s.attrs, g));
+
+  function drawCustomer(g, c, mood = 'smile') {
+    if (!c.shapes) return drawGhost(g, c, mood);
+    clear(g); drawShapes(g, c.shapes);
+    if (c.faces) drawShapes(g, c.faces[mood]);
+    if (c.face) drawFace(g, c.face, mood);
+    drawShapes(g, c.over);
+  }
+  // 妖怪の顔(データの位置で描く)
+  function drawFace(g, f, mood) {
+    const cx = f.cx || 0, cy = f.cy === undefined ? 5 : f.cy, dx = f.dx || 12, e = f.eye || 6.5;
+    const my = f.mouthY === undefined ? cy + 11 : f.mouthY;
+    if (f.cheekDx) {
+      el('ellipse', { cx: cx - f.cheekDx, cy: f.cheekY, rx: 5.5, ry: 3.2, fill: f.cheek || '#FFB3C7' }, g);
+      el('ellipse', { cx: cx + f.cheekDx, cy: f.cheekY, rx: 5.5, ry: 3.2, fill: f.cheek || '#FFB3C7' }, g);
+    }
+    const eyes = f.one ? [cx] : [cx - dx, cx + dx];
+    if (mood === 'happy') {
+      eyes.forEach(x => { const w = f.one ? e * 1.4 : e * .8;
+        el('path', { d: `M${x - w} ${cy + 2} Q${x} ${cy - w * 1.2} ${x + w} ${cy + 2}`, fill: 'none', stroke: S.ink, 'stroke-width': 3, 'stroke-linecap': 'round' }, g); });
+      el('path', { d: `M${cx - 7} ${my - 2} Q${cx} ${my + 12} ${cx + 7} ${my - 2} Z`, fill: '#C2455E', stroke: S.ink, 'stroke-width': 2.5, 'stroke-linejoin': 'round' }, g);
+    } else {
+      eyes.forEach(x => {
+        if (f.one) {
+          el('circle', { cx: x, cy, r: e * 1.5, fill: '#FFFFFF', stroke: S.ink, 'stroke-width': 2.5 }, g);
+          el('circle', { cx: x, cy: cy + 1, r: e * .8, fill: S.ink }, g);
+          el('circle', { cx: x + 2, cy: cy - 2, r: e * .25, fill: '#FFFFFF' }, g);
+        } else {
+          el('ellipse', { cx: x, cy, rx: e * .7, ry: e, fill: S.ink }, g);
+          el('circle', { cx: x + e * .25, cy: cy - e * .4, r: e * .25, fill: '#FFFFFF' }, g);
+        }
+      });
+      el('path', { d: `M${cx - 6} ${my} Q${cx} ${my + 6} ${cx + 6} ${my}`, fill: 'none', stroke: S.ink, 'stroke-width': 3, 'stroke-linecap': 'round' }, g);
+    }
+  }
+  function drawGhost(g, c, mood = 'smile') {
+    clear(g);
+    drawShapes(g, c.behind);
+    el('path', { d: GHOST, fill: c.body, stroke: S.ink, 'stroke-width': 3, 'stroke-linejoin': 'round' }, g);
+    drawShapes(g, c.front);
+    el('ellipse', { cx: -22, cy: 17, rx: 6, ry: 3.5, fill: c.cheek }, g);
+    el('ellipse', { cx: 22, cy: 17, rx: 6, ry: 3.5, fill: c.cheek }, g);
+    if (mood === 'happy') {
+      el('path', { d: 'M-17 7 Q-12 -1 -7 7', fill: 'none', stroke: S.ink, 'stroke-width': 3, 'stroke-linecap': 'round' }, g);
+      el('path', { d: 'M7 7 Q12 -1 17 7', fill: 'none', stroke: S.ink, 'stroke-width': 3, 'stroke-linecap': 'round' }, g);
+      el('path', { d: 'M-8 14 Q0 29 8 14 Z', fill: '#C2455E', stroke: S.ink, 'stroke-width': 2.5, 'stroke-linejoin': 'round' }, g);
+    } else {
+      el('ellipse', { cx: -12, cy: 5, rx: 4.5, ry: 6.5, fill: S.ink }, g);
+      el('ellipse', { cx: 12, cy: 5, rx: 4.5, ry: 6.5, fill: S.ink }, g);
+      el('circle', { cx: -10.5, cy: 2.5, r: 1.6, fill: '#fff' }, g);
+      el('circle', { cx: 13.5, cy: 2.5, r: 1.6, fill: '#fff' }, g);
+      el('path', { d: 'M-6 16 Q0 22 6 16', fill: 'none', stroke: S.ink, 'stroke-width': 3, 'stroke-linecap': 'round' }, g);
+    }
+  }
+
+  // tags: 見せる部品 / baked: やけたか / partial: {tag, n} または {tag, set} 途中まで見せる部品
+  function drawBread(g, bread, tags, baked, partial) {
+    clear(g);
+    const idx = {};
+    for (const s of DATA.commonShapes.concat(bread.shapes)) {
+      if (!tags.has(s.tag)) continue;
+      if (partial && partial.tag === s.tag) {
+        const i = idx[s.tag] = (idx[s.tag] === undefined ? 0 : idx[s.tag] + 1);
+        if (partial.set ? !partial.set.has(i) : i >= partial.n) continue;
+      }
+      const a = Object.assign({}, s.attrs);
+      if (!baked && s.rawAttrs) Object.assign(a, s.rawAttrs);
+      else if (!baked && s.bake) {
+        if (a.fill && a.fill !== 'none') a.fill = S.dough;
+        if (a.stroke && a.stroke !== 'none' && a.stroke !== S.ink) a.stroke = S.dough;
+      }
+      el(s.type, a, g);
+    }
+  }
+  const countTag = (bread, tag) => bread.shapes.filter(x => x.tag === tag).length;
+
+  /* ---------------- 音(コードで合成) ---------------- */
+  let ac;
+  function audio() {
+    if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
+    if (ac.state === 'suspended') ac.resume();
+    return ac;
+  }
+  // パンごとの音の「声色」
+  const SND_DEFAULT = { pitch: 1, wave: 'sine', melody: [1047, 1319, 1568, 2093] };
+  let SND = SND_DEFAULT;
+  const W = () => SND.wave;
+  function tone(freq, dur, type = 'sine', vol = .25, when = 0, slideTo) {
+    const k = SND.pitch || 1;
+    toneRaw(freq * k, dur, type, vol, when, slideTo ? slideTo * k : slideTo);
+  }
+  function toneRaw(freq, dur, type = 'sine', vol = .25, when = 0, slideTo) {
+    const a = audio(); if (!a) return;
+    if (type === 'square' || type === 'sawtooth') vol *= .45;
+    const t = a.currentTime + when;
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + .01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    if (SND.wobble && dur > .09) { // おばけっぽいゆらぎ
+      const lfo = a.createOscillator(), lg = a.createGain();
+      lfo.frequency.value = 9; lg.gain.value = freq * .06;
+      lfo.connect(lg).connect(o.frequency); lfo.start(t); lfo.stop(t + dur + .05);
+    }
+    o.connect(g).connect(a.destination);
+    o.start(t); o.stop(t + dur + .05);
+  }
+  function noise(dur, vol, freq, type = 'lowpass') {
+    const a = audio(); if (!a) return;
+    const b = a.createBuffer(1, Math.floor(a.sampleRate * dur), a.sampleRate);
+    const d = b.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const s = a.createBufferSource(); s.buffer = b;
+    const f = a.createBiquadFilter(); f.type = type; f.frequency.value = freq;
+    const g = a.createGain(); const t = a.currentTime;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + Math.min(.2, dur / 3));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(f).connect(g).connect(a.destination); s.start();
+  }
+  const SFX = {
+    pop:    () => tone(420, .16, W(), .3, 0, 1100),
+    mochi:  () => tone(160 + Math.random() * 60, .12, W(), .25, 0, 90),
+    pechi:  n  => { noise(.08, .3, 1800 * SND.pitch, 'bandpass'); tone(300 - n * 30, .12, W(), .25, 0, 140); },
+    squeeze:() => tone(180, 1.1, W(), .18, 0, 520),
+    swish:  () => { noise(.2, .12, 1400 * SND.pitch, 'bandpass'); tone(600, .12, W(), .05, 0, 900); },
+    goro:   () => tone(85 + Math.random() * 25, .16, W(), .3, 0, 60),
+    shu:    () => { noise(.25, .2, 3000, 'highpass'); tone(500, .22, W(), .18, 0, 1500); },
+    nyu:    () => tone(520 + Math.random() * 80, .1, W(), .07, 0, 640),
+    shaka:  () => { noise(.09, .3, 5000, 'highpass'); tone(1800 + Math.random() * 400, .05, W(), .04); },
+    pin:    n  => { tone(1319 + n * 160, .2, W(), .22); tone(2637 + n * 320, .12, 'sine', .06); },
+    sasa:   () => noise(.12, .07, 4000 * SND.pitch, 'highpass'),
+    tick:   n  => tone(900 + n * 90, .08, W(), .15),
+    stamp:  () => { tone(140, .18, 'square', .15, 0, 70); tone(700, .12, W(), .2, .12, 1400); },
+    whoosh: () => noise(.45, .22, 1800),
+    rumble: () => noise(1.5, .3, 380),
+    splash: () => { noise(.35, .3, 900); tone(300, .2, W(), .2, 0, 120); },
+    ding:   () => { tone(1568, 1.2, W(), .3); tone(2093, 1.0, 'sine', .14, .02); },
+    paku:   () => { tone(320, .08, 'square', .12); tone(220, .1, 'square', .12, .12); },
+    kira:   () => SND.melody.forEach((f, i) => toneRaw(f, .25, W(), .2, i * .08)),
+    yay:    () => [784, 988, 1175, 1568, 1175, 1568].forEach((f, i) => toneRaw(f, .2, 'triangle', .2, i * .09)),
+    fanfare:() => [523, 659, 784, 1047, 784, 1047].forEach((f, i) => toneRaw(f, i === 5 ? .7 : .3, 'triangle', .25, i * .15))
+  };
+
+  /* ---------------- 演出 ---------------- */
+  const fx = $('fx');
+  const CONFETTI = ['#FF8FB8', '#FFE36E', '#8FD3FF', '#FFB547', '#C9B6F2'];
+  function burst(x, y, colors, n = 10, d = 60, r = 4) {
+    for (let i = 0; i < n; i++) {
+      const ang = (Math.PI * 2 * i) / n + Math.random() * .4;
+      const g = el('g', { transform: `translate(${x},${y})` }, fx);
+      const c = el('circle', { r: r + Math.random() * 3, fill: colors[i % colors.length], class: 'a' }, g);
+      c.animate([
+        { transform: 'translate(0,0) scale(1)', opacity: 1 },
+        { transform: `translate(${Math.cos(ang) * d}px,${Math.sin(ang) * d}px) scale(.2)`, opacity: 0 }
+      ], { duration: 700, easing: 'cubic-bezier(.2,.8,.3,1)' }).finished.then(() => g.remove());
+    }
+  }
+  function puff(x, y) { burst(x, y, ['#FFFFFF', '#FFF3DA'], 5, 22, 3); }
+  function ringWave(x, y, color = S.cream) {
+    const g = el('g', { transform: `translate(${x},${y})` }, fx);
+    const c = el('circle', { r: 20, fill: 'none', stroke: color, 'stroke-width': 4, class: 'a' }, g);
+    c.animate([{ transform: 'scale(.5)', opacity: 1 }, { transform: 'scale(2.6)', opacity: 0 }], { duration: 450, easing: 'ease-out' }).finished.then(() => g.remove());
+  }
+  function hearts(x, y) {
+    for (let i = 0; i < 3; i++) {
+      const g = el('g', { transform: `translate(${x + (i - 1) * 22},${y})` }, fx);
+      const h = el('path', { d: 'M0 4 C-10 -6 -4 -14 0 -8 C4 -14 10 -6 0 4 Z', fill: '#FF6F91', class: 'a' }, g);
+      h.animate([{ transform: 'translateY(0) scale(.4)', opacity: 0 }, { transform: 'translateY(-16px) scale(1.2)', opacity: 1, offset: .3 }, { transform: 'translateY(-50px) scale(1)', opacity: 0 }],
+        { duration: 1100, delay: i * 120 }).finished.then(() => g.remove());
+    }
+  }
+  function say(t) {
+    const m = $('msg'); m.textContent = t || '';
+    if (t) m.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 250 });
+  }
+
+  // ゆびについてくる手・道具
+  const fol = $('follower'), folA = $('folAnim'), folG = $('followerGfx');
+  function follower(tool, p) {
+    if (!tool) { fol.style.display = 'none'; fol.dataset.tool = ''; return; }
+    if (fol.dataset.tool !== tool) {
+      clear(folG); drawShapes(folG, DATA.tools[tool]); fol.dataset.tool = tool;
+      folA.getAnimations().forEach(a => a.cancel());
+    }
+    fol.style.display = '';
+    if (p) setPos(fol, p);
+  }
+
+  // おてほんの指
+  function hint(mode, a, b) {
+    const h = $('hand'), ha = $('handAnim');
+    ha.getAnimations().forEach(x => x.cancel());
+    if (!mode) { h.style.display = 'none'; return; }
+    h.style.display = '';
+    const H = P.home;
+    const loop = (pts, dur) => {
+      const o = pts[0];
+      h.setAttribute('transform', `translate(${o.x + 8},${o.y + 8})`);
+      ha.animate(pts.map((q, i) => ({ transform: `translate(${q.x - o.x}px,${q.y - o.y}px)`, opacity: (i === 0 || i === pts.length - 1) ? 0 : 1 })),
+        { duration: dur, iterations: Infinity, easing: 'ease-in-out' });
+    };
+    if (mode === 'press') {
+      const o = a || H;
+      h.setAttribute('transform', `translate(${o.x + 8},${o.y + 8})`);
+      ha.animate([{ transform: 'scale(1)' }, { transform: 'scale(.7)' }, { transform: 'scale(1)' }], { duration: 900, iterations: Infinity });
+    } else if (mode === 'wiggle') {
+      const l = { x: H.x - 30, y: H.y }, r = { x: H.x + 30, y: H.y - 8 };
+      loop([l, l, r, l, r, r], 1800);
+    } else if (mode === 'drag') {
+      loop([P[a], P[a], P[b], P[b]], 1600);
+    } else if (mode === 'circle') {
+      const c = a || H, rx = b || 42, ry = b || 30;
+      const pts = [];
+      for (let i = 0; i <= 16; i++) { const t = i / 16 * Math.PI * 2; pts.push({ x: c.x + rx * Math.cos(t), y: c.y + ry * Math.sin(t) }); }
+      loop([pts[0], ...pts, pts[pts.length - 1]], 2000);
+    } else if (mode === 'swipe') {
+      loop([a, a, b, b], 1200);
+    } else if (mode === 'up') {
+      const lo = { x: H.x, y: H.y + 30 }, hi = { x: H.x, y: H.y - 60 };
+      loop([lo, lo, hi, hi], 1000);
+    } else if (mode === 'updown') {
+      const hi = { x: H.x, y: H.y - 40 }, lo = { x: H.x, y: H.y + 40 };
+      loop([hi, hi, lo, hi, lo, lo], 2000);
+    } else if (mode === 'shake') {
+      const y = H.y - 70, l = { x: H.x - 35, y }, r = { x: H.x + 35, y };
+      loop([l, l, r, l, r, l, r, r], 1400);
+    } else if (mode === 'path') {
+      loop([a[0], ...a, a[a.length - 1]], 700 + a.length * 30);
+    }
+  }
+
+  /* ---------------- シール台紙 ---------------- */
+  const ROWS = SETS;
+  const slotPos = (i, row) => ({ x: 52 + i * 64, y: 34 + row * 27 });
+  function buildBoard() {
+    const b = $('board');
+    b.querySelectorAll('.slot').forEach(n => n.remove());
+    for (let r = 0; r < ROWS; r++) for (let i = 0; i < COLS; i++) {
+      const p = slotPos(i, r);
+      el('circle', { cx: p.x, cy: p.y, r: 11, fill: 'none', stroke: S.cream, 'stroke-width': 2, 'stroke-dasharray': '3 4', opacity: .45, class: 'slot' }, b);
+    }
+  }
+  function makeSticker(parent, c) {
+    const g = el('g', {}, parent);
+    el('circle', { r: 12, fill: c.sticker, stroke: S.cream, 'stroke-width': 2 }, g);
+    drawCustomer(el('g', { transform: c.shapes ? 'translate(0,1) scale(.2)' : 'translate(0,-1) scale(.22)' }, g), c, 'happy');
+    return g;
+  }
+
+  /* ---------------- ゲーム進行 ---------------- */
+  let state = 'title', step = 0, si = 0, cust, bread;
+  let tags, baked, partial, progress = 0, work = {};
+  let pointer = null;
+  const layer = $('breadLayer'), bAnim = $('breadAnim'), bGfx = $('breadGfx'), dots = $('dots');
+  const under = $('underGfx'), over = $('overGfx');
+  const tLayer = $('toolLayer'), tAnim = $('toolAnim');
+  const redraw = () => drawBread(bGfx, bread, tags, baked, partial);
+  const cur = () => bread.steps[si];
+  const gfxTf = (sx = 1, sy = sx, rot = 0) => bGfx.setAttribute('transform', `rotate(${rot}) scale(${SC * sx},${SC * sy})`);
+
+  function drawDots(frac) {
+    clear(dots);
+    if (frac == null) return;
+    const filled = Math.floor(frac * 3 + 1e-6);
+    for (let i = 0; i < 3; i++) {
+      el('circle', { cx: P.home.x + (i - 1) * 30, cy: 614, r: 9, fill: i < filled ? S.glow : 'none', stroke: S.cream, 'stroke-width': 2.5 }, dots);
+    }
+  }
+  function rings(to) {
+    show('breadRing', to === 'bread');
+    show('ovenRing', to === 'oven');
+    show('custRing', to === 'customer');
+    show('toolRing', to === 'tool');
+  }
+  function showTool(id) {
+    clear($('toolGfx')); drawShapes($('toolGfx'), DATA.tools[id]);
+    $('toolGfx').setAttribute('transform', `scale(${(DATA.toolScale || {})[id] || 1.5})`);
+    setPos(tLayer, P.tool);
+    tAnim.getAnimations().forEach(a => a.cancel());
+    tLayer.style.display = '';
+    anim(tAnim, [{ transform: 'scale(0)', opacity: 0 }, { transform: 'scale(1.1)', opacity: 1 }, { transform: 'scale(1)', opacity: 1 }], { duration: 350 });
+  }
+  const hideTool = () => { tLayer.style.display = 'none'; };
+
+  // まぜるボウル(パンの座標で描く)
+  function drawMixBowl() {
+    el('ellipse', { cx: 0, cy: -4, rx: 58, ry: 17, fill: '#5E9FCC', stroke: S.ink, 'stroke-width': 3 }, under);
+    el('path', { d: 'M-58 -4 Q-56 46 0 48 Q56 46 58 -4 Q0 26 -58 -4 Z', fill: '#8FD3FF', stroke: S.ink, 'stroke-width': 3, 'stroke-linejoin': 'round' }, over);
+    el('ellipse', { cx: -30, cy: 20, rx: 8, ry: 4, fill: '#C9ECFF' }, over);
+  }
+  // ゆでるお鍋
+  function drawPot() {
+    el('ellipse', { cx: 0, cy: -8, rx: 58, ry: 16, fill: '#4A4E66', stroke: S.ink, 'stroke-width': 3 }, under);
+    el('ellipse', { cx: 0, cy: -6, rx: 52, ry: 12, fill: '#9FD8F5' }, under);
+    el('rect', { x: -72, y: -6, width: 16, height: 9, rx: 4.5, fill: S.ink }, over);
+    el('rect', { x: 56, y: -6, width: 16, height: 9, rx: 4.5, fill: S.ink }, over);
+    el('path', { d: 'M-58 -8 L-54 40 Q0 50 54 40 L58 -8 Q0 14 -58 -8 Z', fill: '#8E93B0', stroke: S.ink, 'stroke-width': 3, 'stroke-linejoin': 'round' }, over);
+    el('path', { d: 'M-44 10 L-42 34', stroke: '#B8BCD6', 'stroke-width': 4, 'stroke-linecap': 'round' }, over);
+  }
+  function steam() {
+    for (let i = 0; i < 3; i++) {
+      const g = el('g', { transform: `translate(${P.home.x + (i - 1) * 26},${P.home.y - 20})` }, fx);
+      const c = el('circle', { r: 7, fill: '#FFFFFF', opacity: .7, class: 'a' }, g);
+      c.animate([{ transform: 'translateY(0) scale(.6)', opacity: .7 }, { transform: 'translateY(-40px) scale(1.4)', opacity: 0 }],
+        { duration: 800, delay: i * 90 }).finished.then(() => g.remove());
+    }
+  }
+  function drops(color) {
+    const t = fol.transform.baseVal[0].matrix;
+    const g = el('g', { transform: `translate(${t.e},${t.f})` }, fx);
+    const c = el('circle', { r: 3.5, fill: color, class: 'a' }, g);
+    c.animate([{ transform: 'translate(0,0)', opacity: 1 }, { transform: `translate(${P.home.x - t.e}px,${P.home.y - t.f}px)`, opacity: .4 }],
+      { duration: 350, easing: 'ease-in' }).finished.then(() => g.remove());
+  }
+
+  // なぞりの点線
+  function setupGuides(s) {
+    work.guides = s.guides.map(d => {
+      const guide = el('path', { d, fill: 'none', stroke: S.cream, 'stroke-width': 3, 'stroke-dasharray': '2 5', 'stroke-linecap': 'round', opacity: .9 }, over);
+      const L = guide.getTotalLength();
+      const pts = [];
+      for (let l = 0; l <= L; l += 3) { const q = guide.getPointAtLength(l); pts.push({ x: q.x, y: q.y }); }
+      const line = el('polyline', { points: '', fill: 'none', stroke: s.color, 'stroke-width': s.width || 5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, over);
+      return { guide, pts, line, i: 0 };
+    });
+    work.gi = 0;
+    markGuide();
+  }
+  function markGuide() {
+    work.guides.forEach((g, k) => g.guide.setAttribute('stroke', k === work.gi ? '#FFFFFF' : S.cream));
+    const g = work.guides[work.gi];
+    if (g) hint('path', g.pts.filter((_, k) => k % 3 === 0).map(toS));
+  }
+  // ぽちぽちの目印
+  function setupSpots(s) {
+    work.marks = s.spots.map(([x, y]) => {
+      const m = el('circle', { cx: x, cy: y, r: 9, fill: 'none', stroke: '#FFFFFF', 'stroke-width': 2.5, class: 'pulse' }, over);
+      return m;
+    });
+  }
+  const firstSpot = s => { const i = s.spots.findIndex((_, k) => !partial.set.has(k)); return toS({ x: s.spots[i][0], y: s.spots[i][1] }); };
+
+  async function nextCustomer() {
+    const order = ORDERS[step];
+    cust = byId(ALL_CUSTOMERS, order.customer);
+    bread = order.bread === 'rush' ? RUSH_BREAD : byId(DATA.breads, order.bread);
+    si = 0; tags = new Set(bread.startTags); baked = false; partial = null;
+    SND = SND_DEFAULT;
+    state = 'busy';
+    drawCustomer($('custGfx'), cust, 'smile');
+    $('custGfx').setAttribute('transform', `scale(${1.3 * (cust.size || 1)})`);
+    if (bread === RUSH_BREAD) {
+      const bb = $('bubbleBread'); clear(bb);
+      shuffle(DATA.breads.filter(b => !b.special)).slice(0, 3).forEach((b, i) => {
+        const g = el('g', { transform: `translate(${(i - 1) * 30},${i === 1 ? -8 : 8}) scale(.42)` }, bb);
+        drawBread(g, b, new Set(b.finalTags), true);
+      });
+    } else drawBread($('bubbleBread'), bread, new Set(bread.finalTags), true);
+    setPos(layer, P.home);
+    anim(bAnim, [{ transform: 'scale(0)', opacity: 0 }, { transform: 'scale(0)', opacity: 0 }], { duration: 1 });
+    gfxTf(); clear(under); clear(over);
+    if (bread.steps[0].type === 'stir' && bread.steps[0].bowl) drawMixBowl();
+    redraw(); drawDots(null); say(''); rings(null); hint(null); hideTool(); follower(null); ovenReset();
+    SFX.whoosh();
+    await anim($('custAnim'), [
+      { transform: 'translate(-40px,20px) scale(.5)', opacity: 0 },
+      { transform: 'translate(0,0) scale(1)', opacity: 1 }
+    ], { duration: 800, easing: 'cubic-bezier(.3,1.5,.5,1)' });
+    say(bread === RUSH_BREAD ? DATA.rush.hello : (cust.hello || T.hello)); SFX.pop();
+    await anim($('bubble'), [{ transform: 'scale(0)', opacity: 0 }, { transform: 'scale(1)', opacity: 1 }],
+      { duration: 400, easing: 'cubic-bezier(.3,1.6,.5,1)' });
+    await anim(bAnim, [{ transform: 'scale(0)', opacity: 0 }, { transform: 'scale(1.1)', opacity: 1 }, { transform: 'scale(1)', opacity: 1 }], { duration: 400 });
+    await wait(400);
+    SND = Object.assign({}, SND_DEFAULT, bread.sound || {});
+    beginStep();
+  }
+
+  function beginStep() {
+    const s = cur();
+    progress = 0; work = {};
+    say(s.type === 'drag' || s.type === 'place' ? s.say : s.say);
+    if (s.tag) { partial = s.type === 'spots' ? { tag: s.tag, set: new Set() } : { tag: s.tag, n: 0 }; tags.add(s.tag); redraw(); }
+    rings(null); drawDots(null);
+    switch (s.type) {
+      case 'drag':
+        raise(layer);
+        if (s.tool) showTool(s.tool);
+        rings(s.to); hint('drag', 'home', s.to); break;
+      case 'place':
+        showTool(s.tool); raise(tLayer);
+        rings('tool'); hint('drag', 'tool', 'home'); break;
+      case 'tap':   rings('bread'); drawDots(0); hint('press'); break;
+      case 'hold':  rings('bread'); hint('press'); break;
+      case 'rub':   rings('bread'); drawDots(0); hint('wiggle'); break;
+      case 'brush': rings('bread'); drawDots(0); hint('wiggle'); follower('brush', { x: P.home.x + 58, y: P.home.y - 20 }); break;
+      case 'stir':
+        if (s.bowl && !under.firstChild) drawMixBowl();
+        if (s.pot && !under.firstChild) drawPot();
+        rings(s.bowl || s.pot ? null : 'bread'); drawDots(0); hint('circle');
+        work.rot = 0; work.acc = 0; break;
+      case 'roll':
+        drawDots(0); hint('updown');
+        follower('pin', { x: P.home.x, y: P.home.y - 45 }); work.pinY = P.home.y - 45; break;
+      case 'flick': rings('bread'); drawDots(0); hint('up'); break;
+      case 'path':  drawDots(0); setupGuides(s); break;
+      case 'shake':
+        drawDots(0); hint('shake');
+        follower('shaker', { x: P.home.x, y: P.home.y - 60 }); break;
+      case 'spots': drawDots(0); setupSpots(s); hint('press', firstSpot(s)); break;
+      case 'bake': setupBake(s); break;
+      case 'rush': startRush(); return;
+    }
+    state = 'play';
+  }
+
+  async function completeStep() {
+    state = 'busy'; pointer = null;
+    const s = cur();
+    hint(null); rings(null); follower(null);
+    if (s.done) {
+      (s.done.hide || []).forEach(t => tags.delete(t));
+      (s.done.show || []).forEach(t => tags.add(t));
+    }
+    partial = null;
+    gfxTf();
+    const hadBowl = s.type === 'stir' && (s.bowl || s.pot);
+    clear(over);
+    if (!hadBowl) clear(under);
+    redraw();
+    if (s.type !== 'drag') {
+      await wait(250);
+      SFX.kira();
+      burst(P.home.x, P.home.y, [S.cream, S.glow, '#FFFFFF'], 12, 70);
+      await anim(bAnim, [{ transform: 'scale(.7)' }, { transform: 'scale(1.15)' }, { transform: 'scale(1)' }], { duration: 420 });
+      if (hadBowl) { // ボウルからとりだす
+        clear(under);
+        await anim(bAnim, [{ transform: 'translateY(0)' }, { transform: 'translateY(-26px)' }, { transform: 'translateY(0)' }], { duration: 380, easing: 'ease-out' });
+      }
+      drawDots(null);
+      await wait(250);
+    }
+    si++;
+    beginStep();
+  }
+
+  /* ---------------- アクション ---------------- */
+  function squish() {
+    anim(bAnim, [{ transform: 'scale(1,1)' }, { transform: 'scale(1.25,.75)' }, { transform: 'scale(.92,1.1)' }, { transform: 'scale(1,1)' }], { duration: 360, easing: 'ease-out' });
+  }
+  function slap(p) {
+    const g = el('g', { transform: `translate(${p.x},${p.y - 6})` }, fx);
+    const inner = el('g', { class: 'a' }, g);
+    drawShapes(el('g', { transform: 'scale(1.4)' }, inner), DATA.tools.mitten);
+    inner.animate([
+      { transform: 'translateY(-40px) scale(1.2)', opacity: 0 },
+      { transform: 'translateY(0) scale(1)', opacity: 1, offset: .35 },
+      { transform: 'translateY(0) scale(.92,.85)', opacity: 1, offset: .55 },
+      { transform: 'translateY(-20px) scale(1)', opacity: 0 }
+    ], { duration: 420, easing: 'ease-out' }).finished.then(() => g.remove());
+    setTimeout(() => ringWave(p.x, p.y + 6), 140);
+  }
+
+  function onDown(e) {
+    if (state !== 'play') return;
+    e.preventDefault();
+    audio();
+    const s = cur(), p = svgPt(e);
+    const onBread = dist(p, P.home) < 80;
+    switch (s.type) {
+      case 'tap': {
+        if (!onBread) return;
+        hint(null);
+        progress++;
+        slap(p); SFX.pechi(progress);
+        setTimeout(squish, 140);
+        if (s.squash) gfxTf(1 + s.squash * progress, 1 - s.squash * progress);
+        if (s.tag) { partial.n = progress * (s.perTap || 1); redraw(); }
+        drawDots(progress / s.count);
+        if (progress >= s.count) { state = 'busy'; setTimeout(completeStep, 300); }
+        break;
+      }
+      case 'hold': {
+        if (!onBread) return;
+        hint(null);
+        if (s.follower) {
+          follower(s.follower, { x: P.home.x + 18, y: P.home.y - 38 });
+          folA.animate([{ transform: 'rotate(0deg)' }, { transform: 'rotate(-35deg)' }], { duration: 300, fill: 'forwards' });
+          work.dropT = 0;
+        } else {
+          work.dent = el('ellipse', { cx: 0, cy: 0, rx: 3, ry: 3, fill: S.ink, opacity: .28 }, over);
+          follower('mitten', { x: P.home.x + 4, y: P.home.y - 4 });
+          folA.animate([{ transform: 'scale(1)' }, { transform: 'scale(.88)' }], { duration: s.ms, fill: 'forwards' });
+        }
+        pointer = { mode: 'hold', t0: performance.now() };
+        SFX.squeeze();
+        show('holdRing', true);
+        holdTick();
+        break;
+      }
+      case 'rub': hint(null); pointer = { mode: 'rub', last: p, acc: 0 }; follower('mitten', p); break;
+      case 'brush': hint(null); pointer = { mode: 'rub', last: p, acc: 0 }; follower('brush', p); break;
+      case 'stir':
+        hint(null);
+        pointer = { mode: 'stir', lastA: Math.atan2(p.y - P.home.y, p.x - P.home.x), acc: 0 };
+        follower(s.bowl || s.pot ? 'spoon' : 'mitten', p); break;
+      case 'roll': hint(null); pointer = { mode: 'roll', lastY: p.y, acc: 0 }; break;
+      case 'flick': hint(null); pointer = { mode: 'flick', y0: p.y, fired: false }; break;
+      case 'path': hint(null); work.needLift = false; pointer = { mode: 'path' }; follower('bag', p); pathMove(p); break;
+      case 'shake': hint(null); pointer = { mode: 'shake', lastX: p.x, dir: 0, run: 0 }; shakerTo(p); break;
+      case 'spots': spotTap(p); break;
+      case 'bake': bakeDown(s, p); break;
+      case 'rush': if (work.running) { hint(null); pointer = { mode: 'rushRub', last: p, acc: 0 }; follower('mitten', p); } break;
+      case 'drag':
+        if (!onBread) return;
+        hint(null);
+        pointer = { mode: 'drag', off: { x: P.home.x - p.x, y: P.home.y - p.y } };
+        SFX.pop();
+        anim(bAnim, [{ transform: 'scale(1)' }, { transform: 'scale(1.12)' }], { duration: 150 });
+        break;
+      case 'place': {
+        const tp = { x: +tLayer.transform.baseVal[0].matrix.e, y: +tLayer.transform.baseVal[0].matrix.f };
+        if (dist(p, tp) > 70) return;
+        hint(null);
+        pointer = { mode: 'tool', off: { x: tp.x - p.x, y: tp.y - p.y } };
+        SFX.pop();
+        anim(tAnim, [{ transform: 'scale(1)' }, { transform: 'scale(1.12)' }], { duration: 150 });
+        break;
+      }
+    }
+  }
+
+  const HOLD_C = 2 * Math.PI * 56;
+  function holdTick() {
+    if (!pointer || pointer.mode !== 'hold') return;
+    const s = cur();
+    const f = Math.min(1, (performance.now() - pointer.t0) / s.ms);
+    $('holdRing').setAttribute('stroke-dasharray', `${HOLD_C * f} ${HOLD_C}`);
+    if (work.dent) { work.dent.setAttribute('rx', 3 + 11 * f); work.dent.setAttribute('ry', 3 + 10 * f); }
+    if (s.follower) {
+      const now = performance.now();
+      if (now - work.dropT > 90) { work.dropT = now; drops(s.follower === 'bag' ? '#5A3320' : '#E8B04A'); if (Math.random() < .5) SFX.nyu(); }
+    } else gfxTf(1 + .06 * f, 1 - .08 * f);
+    if (f >= 1) {
+      pointer = null; show('holdRing', false);
+      SFX.pop();
+      ringWave(P.home.x, P.home.y, '#FFFFFF');
+      burst(P.home.x, P.home.y, ['#FFFFFF', S.cream], 8, 40);
+      completeStep();
+      return;
+    }
+    requestAnimationFrame(holdTick);
+  }
+
+  function shakerTo(p) { follower('shaker', { x: p.x, y: Math.min(p.y, P.home.y - 40) }); }
+  function shakeHit() {
+    const s = cur();
+    const total = countTag(bread, s.tag);
+    SFX.shaka();
+    const side = folA.dataset.side === '1' ? -1 : 1; folA.dataset.side = side === 1 ? '1' : '0';
+    folA.animate([{ transform: 'rotate(0deg)' }, { transform: `rotate(${side * 22}deg)` }, { transform: 'rotate(0deg)' }], { duration: 180 });
+    const t = fol.transform.baseVal[0].matrix;
+    for (let i = 0; i < 4; i++) {
+      const x0 = t.e + (Math.random() - .5) * 16, y0 = t.f;
+      const g = el('g', { transform: `translate(${x0},${y0})` }, fx);
+      const r = el('rect', { x: -3.5, y: -1.5, width: 7, height: 3, rx: 1.5, fill: CONFETTI[(Math.random() * 5) | 0], class: 'a' }, g);
+      const ty = P.home.y - y0 + (Math.random() - .5) * 30, tx = (P.home.x - x0) * .6 + (Math.random() - .5) * 40;
+      r.animate([{ transform: 'translate(0,0) rotate(0deg)', opacity: 1 }, { transform: `translate(${tx}px,${ty}px) rotate(${Math.random() * 360}deg)`, opacity: 0 }],
+        { duration: 500, easing: 'ease-in' }).finished.then(() => g.remove());
+    }
+    setTimeout(() => {
+      if (!partial || partial.tag !== s.tag) return;
+      partial.n = Math.min(total, partial.n + (s.perShake || 1)); redraw();
+      drawDots(partial.n / total);
+      if (partial.n >= total && state === 'play') { pointer = null; completeStep(); }
+    }, 350);
+  }
+
+  function pathMove(p) {
+    const b = toB(p);
+    const g = work.guides[work.gi]; if (!g) return;
+    if (work.needLift) return;              // 1本かいたら、いったん指をはなす
+    if (g.i === 0) {                        // かきはじめは点線のスタート近くから
+      if (dist(b, g.pts[0]) > 18) return;
+      g.i = 1;
+    }
+    for (let k = g.i; k < Math.min(g.pts.length, g.i + 3); k++) {
+      if (dist(b, g.pts[k]) < 18) {
+        g.i = k + 1;
+        g.line.setAttribute('points', g.pts.slice(0, g.i).map(q => `${q.x},${q.y}`).join(' '));
+        if (Math.random() < .35) SFX.nyu();
+        break;
+      }
+    }
+    const n = work.guides.length;
+    drawDots((work.gi + g.i / g.pts.length) / n);
+    if (g.i >= g.pts.length - 1) {
+      g.line.setAttribute('points', g.pts.map(q => `${q.x},${q.y}`).join(' '));
+      g.guide.style.display = 'none';
+      SFX.pin(work.gi);
+      const end = toS(g.pts[g.pts.length - 1]);
+      burst(end.x, end.y, ['#FFFFFF', S.cream], 6, 22, 3);
+      work.gi++;
+      work.needLift = true;
+      if (work.gi >= n) { pointer = null; follower(null); completeStep(); }
+      else { work.guides.forEach((q, k) => q.guide.setAttribute('stroke', k === work.gi ? '#FFFFFF' : S.cream)); }
+    }
+  }
+
+  function spotTap(p) {
+    const s = cur(), b = toB(p);
+    let best = -1, bd = 26;
+    s.spots.forEach(([x, y], k) => { const d = dist(b, { x, y }); if (!partial.set.has(k) && d < bd) { bd = d; best = k; } });
+    if (best < 0) return;
+    hint(null);
+    partial.set.add(best); redraw();
+    work.marks[best].remove();
+    const q = toS({ x: s.spots[best][0], y: s.spots[best][1] });
+    SFX.pin(partial.set.size);
+    ringWave(q.x, q.y, '#FFFFFF');
+    burst(q.x, q.y, ['#FFFFFF', '#E6EEF7', S.cream], 6, 22, 3);
+    drawDots(partial.set.size / s.spots.length);
+    if (partial.set.size >= s.spots.length) completeStep();
+    else hint('press', firstSpot(s));
+  }
+
+  function onMove(e) {
+    if (!pointer || state !== 'play') return;
+    const s = cur(), p = svgPt(e);
+    switch (pointer.mode) {
+      case 'rub': {
+        const d = dist(p, pointer.last); pointer.last = p;
+        follower(s.type === 'brush' ? 'brush' : 'mitten', p);
+        if (d > 140) return;
+        progress += d; pointer.acc += d;
+        if (s.type === 'rub') {
+          if (pointer.acc > 70) { pointer.acc = 0; SFX.mochi(); squish(); puff(p.x, p.y); }
+          drawDots(progress / s.amount);
+          if (progress >= s.amount) completeStep();
+        } else {
+          if (pointer.acc > 45) { pointer.acc = 0; SFX.sasa(); }
+          const total = countTag(bread, s.tag);
+          const n = Math.min(total, Math.floor(progress / s.per));
+          if (n > partial.n) {
+            partial.n = n; redraw(); SFX.tick(n);
+            burst(p.x, p.y, ['#FFFFFF', '#FFF6D6'], 4, 18, 2);
+            drawDots(n / total);
+            if (n >= total) completeStep();
+          }
+        }
+        break;
+      }
+      case 'stir': {
+        follower(s.bowl || s.pot ? 'spoon' : 'mitten', p);
+        const a = Math.atan2(p.y - P.home.y, p.x - P.home.x);
+        let d = a - pointer.lastA; pointer.lastA = a;
+        if (d > Math.PI) d -= 2 * Math.PI; if (d < -Math.PI) d += 2 * Math.PI;
+        if (Math.abs(d) > 1.2 || dist(p, P.home) < 8) return;
+        work.acc += Math.abs(d); pointer.acc += Math.abs(d);
+        work.rot += d * 180 / Math.PI * .8;
+        const f = Math.min(1, work.acc / (s.turns * 2 * Math.PI));
+        if (!s.noSpin) gfxTf(1 - .08 * f, 1 - .08 * f, work.rot);
+        if (s.tag) {
+          const n = Math.floor(f * countTag(bread, s.tag) + 1e-6);
+          if (n !== partial.n) { partial.n = n; redraw(); SFX.tick(n); }
+        }
+        if (pointer.acc > 1.1) {
+          pointer.acc = 0;
+          if (s.pot) { SFX.swish(); steam(); } else if (s.bowl) SFX.swish(); else { SFX.mochi(); puff(p.x, p.y); }
+        }
+        drawDots(f);
+        if (f >= 1) completeStep();
+        break;
+      }
+      case 'roll': {
+        const y = Math.max(P.home.y - 50, Math.min(P.home.y + 50, p.y));
+        const d = Math.abs(y - pointer.lastY); pointer.lastY = y;
+        follower('pin', { x: P.home.x, y });
+        folA.style.transform = `rotate(${Math.sin(y / 9) * 4}deg)`;
+        if (d > 50) return;
+        progress += d; pointer.acc += d;
+        const f = Math.min(1, progress / s.amount);
+        gfxTf(1 + .22 * f, 1 - .12 * f);
+        if (pointer.acc > 38) { pointer.acc = 0; SFX.goro(); }
+        drawDots(f);
+        if (f >= 1) { folA.style.transform = ''; completeStep(); }
+        break;
+      }
+      case 'flick': {
+        if (!pointer.fired && pointer.y0 - p.y > 40) { pointer.fired = true; flickOne(); }
+        break;
+      }
+      case 'path': follower('bag', p); pathMove(p); break;
+      case 'shake': {
+        shakerTo(p);
+        const dx = p.x - pointer.lastX; pointer.lastX = p.x;
+        if (!dx) break;
+        const dir = Math.sign(dx);
+        if (dir !== pointer.dir) {
+          if (pointer.run > 14) shakeHit();
+          pointer.dir = dir; pointer.run = 0;
+        }
+        pointer.run += Math.abs(dx);
+        break;
+      }
+      case 'rushRub': {
+        follower('mitten', p);
+        const d = dist(p, pointer.last); pointer.last = p;
+        if (d > 140) break;
+        pointer.acc += d;
+        while (pointer.acc >= DATA.rush.perRub && work.running) { pointer.acc -= DATA.rush.perRub; rushOne(p); }
+        break;
+      }
+      case 'dial': {
+        const a = Math.atan2(p.y - OV.knob.y, p.x - OV.knob.x);
+        let d = a - pointer.lastA; pointer.lastA = a;
+        if (d > Math.PI) d -= 2 * Math.PI; if (d < -Math.PI) d += 2 * Math.PI;
+        if (Math.abs(d) > 1.2) break;
+        work.acc += Math.abs(d); work.rot += d * 180 / Math.PI; pointer.acc += Math.abs(d);
+        $('dialRot').setAttribute('transform', `rotate(${work.rot})`);
+        const f = Math.min(1, work.acc / (s.turns * 2 * Math.PI));
+        $('ovenGlow').setAttribute('opacity', .15 + .5 * f);
+        if (pointer.acc > .5) { pointer.acc = 0; SFX.tick(Math.floor(f * 8)); }
+        drawDots(f);
+        if (f >= 1) { pointer = null; bakeDone(); }
+        break;
+      }
+      case 'lever': {
+        const f = Math.max(0, Math.min(1, (p.y - pointer.y0) / 55));
+        $('leverArm').setAttribute('transform', `rotate(${-15 + 190 * f})`);
+        if (f >= 1) { pointer = null; SFX.stamp(); bakeDone(); }
+        break;
+      }
+      case 'drag': setPos(layer, { x: p.x + pointer.off.x, y: p.y + pointer.off.y }); break;
+      case 'tool': setPos(tLayer, { x: p.x + pointer.off.x, y: p.y + pointer.off.y }); break;
+    }
+  }
+
+  function flickOne() {
+    const s = cur();
+    progress++;
+    const st = s.stages && s.stages[progress - 1];
+    if (st) { (st.hide || []).forEach(t => tags.delete(t)); (st.show || []).forEach(t => tags.add(t)); redraw(); }
+    SFX.shu();
+    anim(bAnim, [
+      { transform: 'translateY(0) rotateX(0deg) scale(1)' },
+      { transform: 'translateY(-26px) scale(1.05,.8)', offset: .4 },
+      { transform: 'translateY(0) scale(1)' }
+    ], { duration: 380, easing: 'ease-out' });
+    for (let i = 0; i < 3; i++) {
+      const g = el('g', { transform: `translate(${P.home.x + (i - 1) * 26},${P.home.y - 20})` }, fx);
+      const l = el('path', { d: 'M0 0 L0 -18', stroke: S.cream, 'stroke-width': 3, 'stroke-linecap': 'round', class: 'a' }, g);
+      l.animate([{ transform: 'translateY(0)', opacity: 1 }, { transform: 'translateY(-30px)', opacity: 0 }], { duration: 350, delay: i * 40 }).finished.then(() => g.remove());
+    }
+    drawDots(progress / s.count);
+    if (progress >= s.count) { state = 'busy'; setTimeout(completeStep, 250); }
+  }
+
+  function onUp(e) {
+    if (!pointer) return;
+    const pr = pointer; pointer = null;
+    if (state !== 'play') return;
+    const s = cur();
+    switch (pr.mode) {
+      case 'hold':
+        show('holdRing', false);
+        if (work.dent) { work.dent.remove(); work.dent = null; }
+        gfxTf(); follower(null);
+        hint('press'); break;
+      case 'rub': follower(s.type === 'brush' ? 'brush' : null, s.type === 'brush' ? { x: P.home.x + 58, y: P.home.y - 20 } : null); hint('wiggle'); break;
+      case 'stir': follower(null); hint('circle'); break;
+      case 'roll': folA.style.transform = ''; hint('updown'); break;
+      case 'flick': if (!pr.fired) hint('up'); break;
+      case 'path': follower(null); markGuide(); break;
+      case 'shake': follower('shaker', { x: P.home.x, y: P.home.y - 60 }); hint('shake'); break;
+      case 'rushRub': follower(null); break;
+      case 'btn':
+        $('ovenBtnA').animate([{ transform: 'scale(.85)' }, { transform: 'scale(1)' }], { duration: 150, fill: 'forwards' });
+        $('ovenGlow').setAttribute('opacity', .15);
+        hint('press', OV.btn); break;
+      case 'dial': hint('circle', OV.knob, 26); break;
+      case 'lever':
+        $('leverArm').setAttribute('transform', 'rotate(-15)');
+        hint('swipe', OV.lever, OV.leverDown); break;
+      case 'drag': case 'tool': {
+        const p = svgPt(e);
+        const at = { x: p.x + pr.off.x, y: p.y + pr.off.y };
+        const target = pr.mode === 'drag' ? P[s.to] : P.home;
+        const hit = dist(at, target) < DATA.dropRadius || dist(p, target) < DATA.dropRadius;
+        if (pr.mode === 'drag') hit ? dropOn(s.to, at) : returnBack(layer, bAnim, P.home, at, () => hint('drag', 'home', s.to));
+        else hit ? stamp(at) : returnBack(tLayer, tAnim, P.tool, at, () => hint('drag', 'tool', 'home'));
+        break;
+      }
+    }
+  }
+
+  async function returnBack(node, inner, home, from, after) {
+    state = 'busy';
+    setPos(node, home);
+    await anim(inner, [
+      { transform: `translate(${from.x - home.x}px,${from.y - home.y}px) scale(1.12)` },
+      { transform: 'translate(0,0) scale(1)' }
+    ], { duration: 350, easing: 'ease-out' });
+    state = 'play';
+    after();
+  }
+
+  async function stamp(from) {
+    state = 'busy';
+    setPos(tLayer, P.home);
+    await anim(tAnim, [
+      { transform: `translate(${from.x - P.home.x}px,${from.y - P.home.y}px) scale(1.12)` },
+      { transform: 'translate(0,-14px) scale(1.12)', offset: .45 },
+      { transform: 'translate(0,4px) scale(.95)', offset: .75 },
+      { transform: 'translate(0,-6px) scale(1)' }
+    ], { duration: 650, easing: 'ease-in-out' });
+    SFX.stamp();
+    ringWave(P.home.x, P.home.y);
+    squish();
+    const s = cur();
+    (s.done && s.done.hide || []).forEach(t => tags.delete(t));
+    (s.done && s.done.show || []).forEach(t => tags.add(t));
+    redraw();
+    await anim(tAnim, [{ transform: 'translate(0,-6px) scale(1)', opacity: 1 }, { transform: 'translate(0,-40px) scale(.6)', opacity: 0 }], { duration: 350 });
+    hideTool();
+    tAnim.getAnimations().forEach(a => a.cancel());
+    completeStep();
+  }
+
+  async function dropOn(to, from) {
+    state = 'busy'; rings(null); hint(null);
+    const t = P[to];
+    setPos(layer, t);
+    const off = `translate(${from.x - t.x}px,${from.y - t.y}px)`;
+    if (to === 'oven') {
+      SFX.pop();
+      await anim(bAnim, [{ transform: `${off} scale(1.12)`, opacity: 1 }, { transform: 'translate(0,0) scale(.4)', opacity: 0 }], { duration: 450, easing: 'ease-in' });
+      drawBread($('ovenBread'), bread, tags, false);
+      show('ovenBread', true);
+      $('ovenBread').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 250 });
+      setPos(layer, P.home);
+      si++;
+      if (cur().type === 'bake') beginStep(); else { await runBake(); beginStep(); }
+    } else if (to === 'tool') {
+      const eff = cur().effect || 'splash';
+      await anim(bAnim, [
+        { transform: `${off} scale(1.12)` },
+        { transform: 'translate(0,-10px) scale(1)', offset: .35 },
+        { transform: 'translate(0,16px) scale(.85,.7)', offset: .6 },
+        { transform: 'translate(0,-6px) scale(1)' }
+      ], { duration: 900, easing: 'ease-in-out' });
+      if (eff === 'fry') {
+        say(cur().say);
+        for (let i = 0; i < 8; i++) {
+          noise(.25, .18, 3500, 'highpass');
+          burst(t.x + (Math.random() - .5) * 60, t.y - 12, ['#FFF1A8', '#FFFFFF', '#F5C542'], 5, 20, 3);
+          anim(bAnim, [{ transform: 'translate(0,4px) scale(.98)' }, { transform: 'translate(0,-2px) scale(1)' }], { duration: 200 });
+          await wait(200);
+        }
+        baked = true;
+        SFX.ding();
+      } else if (eff === 'crumb') {
+        noise(.3, .25, 2500, 'bandpass');
+        burst(t.x, t.y - 10, ['#EAC98A', '#B8863A', '#F3DDB0'], 14, 55, 3);
+      } else if (eff === 'plop') {
+        noise(.2, .25, 700); tone(260, .18, 'sine', .25, 0, 520);
+        burst(t.x, t.y - 10, ['#F3D98A', '#FFFFFF'], 8, 40, 3);
+      } else {
+        SFX.splash();
+        burst(t.x, t.y - 10, ['#FF8FB8', '#FFC4D8', '#FF8FB8'], 12, 55);
+      }
+      const dn = cur().done || {};
+      (dn.hide || []).forEach(x => tags.delete(x)); (dn.show || []).forEach(x => tags.add(x)); redraw();
+      await wait(250);
+      hideTool();
+      setPos(layer, P.home);
+      await anim(bAnim, [
+        { transform: `translate(${t.x - P.home.x}px,${t.y - 6 - P.home.y}px) scale(1)` },
+        { transform: 'translate(0,0) scale(1)' }
+      ], { duration: 450, easing: 'ease-out' });
+      si++; beginStep();
+    } else if (to === 'customer') {
+      await anim(bAnim, [{ transform: `${off} scale(1.12)`, opacity: 1 }, { transform: 'translate(0,-10px) scale(.3)', opacity: 0 }], { duration: 450, easing: 'ease-in' });
+      await eat();
+    }
+  }
+
+  /* ---- 5人目:「いっぱい ください!」タイムアタック ---- */
+  const RUSH_BREAD = { id: 'rush', startTags: [], finalTags: [], shapes: [], steps: [{ type: 'rush', say: (DATA.rush || {}).say }] };
+  const BEST_KEY = 'obake-panya-rush-best';
+  let rushBest = 0;
+  try { rushBest = +localStorage.getItem(BEST_KEY) || 0; } catch (e) { rushBest = 0; }
+  const PILE = [[-28, -6], [0, -10], [28, -6], [-14, -18], [14, -18], [-30, -24], [0, -28], [30, -24], [-16, -36], [16, -36], [0, -44]];
+  function bigText(t, size = 56, y = 470) {
+    const g = el('g', { transform: `translate(180,${y})` }, fx);
+    const tx = el('text', { x: 0, y: 0, 'text-anchor': 'middle', 'font-size': size, fill: S.cream, stroke: S.ink, 'stroke-width': 5, 'paint-order': 'stroke', class: 'a' }, g);
+    tx.textContent = t;
+    return tx.animate([{ transform: 'scale(.3)', opacity: 0 }, { transform: 'scale(1.15)', opacity: 1, offset: .3 }, { transform: 'scale(1)', opacity: 1, offset: .75 }, { transform: 'scale(1)', opacity: 0 }],
+      { duration: 700 }).finished.then(() => g.remove());
+  }
+  const LV = () => { const L = DATA.rush.levels; let k = 0; L.forEach((t, i) => { if (work.count >= t) k = i; }); return k; };
+  const STAR4 = 'M0 -8 L2 -2 L8 0 L2 2 L0 8 L-2 2 L-8 0 L-2 -2 Z';
+  // ごうかさ(lv 0〜4)でミニパンの見た目をかえる
+  function drawMini(g, b, lv) {
+    const tall = lv >= 6;                       // 2だんかさね
+    if (lv >= 8) for (let i = 0; i < 10; i++)   // ひかりの すじ
+      el('path', { d: 'M0 0 L-9 -92 L9 -92 Z', transform: `rotate(${i * 36})`, fill: '#FFE9A0', opacity: .75 }, g);
+    if (lv >= 4) ['#FF8FB8', '#FFE36E', '#8FD3FF', '#C9B6F2'].forEach((c, i) =>
+      el('circle', { r: (lv >= 9 ? 78 : 60) - i * 9, fill: 'none', stroke: c, 'stroke-width': 8, opacity: .85 }, g));
+    else if (lv >= 3) { el('circle', { r: 52, fill: '#FFE36E', opacity: .3 }, g); el('circle', { r: 56, fill: 'none', stroke: '#FFE36E', 'stroke-width': 7, opacity: .9 }, g); }
+    if (lv >= 8) {                              // はね
+      el('path', { d: 'M-34 -6 Q-78 -40 -86 4 Q-70 26 -34 16 Z', fill: '#FFFFFF', stroke: S.ink, 'stroke-width': 3, 'stroke-linejoin': 'round' }, g);
+      el('path', { d: 'M34 -6 Q78 -40 86 4 Q70 26 34 16 Z', fill: '#FFFFFF', stroke: S.ink, 'stroke-width': 3, 'stroke-linejoin': 'round' }, g);
+    }
+    if (lv >= 5) {                              // きんの おさら
+      el('ellipse', { cx: 0, cy: 36, rx: 50, ry: 12, fill: '#FFD84D', stroke: S.ink, 'stroke-width': 3 }, g);
+      el('ellipse', { cx: -16, cy: 33, rx: 12, ry: 3, fill: '#FFF3C0' }, g);
+    }
+    if (lv === 0) {
+      el('circle', { r: 30, fill: '#E8B04A', stroke: S.ink, 'stroke-width': 3 }, g);
+      el('ellipse', { cx: -10, cy: -12, rx: 9, ry: 5, fill: '#FFF3DA', opacity: .8 }, g);
+    } else drawBread(el('g', {}, g), b, new Set(b.finalTags), true);
+    if (tall) drawBread(el('g', { transform: 'translate(0,-56) scale(.55)' }, g), b, new Set(b.finalTags), true);
+    if (lv >= 2) {                              // クリームと さくらんぼ
+      const y = tall ? -86 : -30;
+      el('path', { d: `M-16 ${y} Q-18 ${y - 14} 0 ${y - 16} Q18 ${y - 14} 16 ${y} Q0 ${y + 6} -16 ${y} Z`, fill: '#FFFFFF', stroke: S.ink, 'stroke-width': 2.5 }, g);
+      el('circle', { cx: 0, cy: y - 22, r: 8, fill: '#E8374A', stroke: S.ink, 'stroke-width': 2.5 }, g);
+      el('path', { d: `M0 ${y - 30} Q4 ${y - 40} 12 ${y - 42}`, fill: 'none', stroke: '#3F7A3A', 'stroke-width': 3, 'stroke-linecap': 'round' }, g);
+    }
+    if (lv >= 5) [['#FF6F91', -52, 6], ['#8FD3FF', 52, -6], ['#7CC46A', -40, -40], ['#FFD84D', 42, -38]].forEach(([c, x, y]) =>
+      el('path', { d: 'M0 -11 L8 0 L0 11 L-8 0 Z', transform: `translate(${x},${y})`, fill: c, stroke: S.ink, 'stroke-width': 2 }, g));
+    if (lv >= 3) [[-44, -30], [44, -20], [-36, 36], [40, 34], [0, -60]].forEach(([x, y]) =>
+      el('path', { d: STAR4, transform: `translate(${x},${y}) scale(1.3)`, fill: '#FFFFFF' }, g));
+    if (lv >= 7) {                              // ひかりの わ
+      const y = tall ? -112 : -66;
+      el('ellipse', { cx: 0, cy: y, rx: 34, ry: 9, fill: 'none', stroke: '#FFE36E', 'stroke-width': 6, opacity: .95 }, g);
+    }
+    if (lv >= 4) {                              // おうかん
+      const y = tall ? -96 : -62;
+      const s = lv >= 9 ? 1.4 : 1;
+      el('path', { d: 'M-18 0 L-20 -22 L-9 -12 L0 -26 L9 -12 L20 -22 L18 0 Z', transform: `translate(0,${y}) scale(${s})`, fill: '#FFD84D', stroke: S.ink, 'stroke-width': 3, 'stroke-linejoin': 'round' }, g);
+      if (lv >= 9) [[-14, -8], [0, -14], [14, -8]].forEach(([x, yy]) => el('circle', { cx: x * s, cy: y + yy * s, r: 3.5, fill: '#FF6F91', stroke: S.ink, 'stroke-width': 1.5 }, g));
+    }
+    if (lv >= 9) for (let i = 0; i < 8; i++)
+      el('path', { d: STAR4, transform: `rotate(${i * 45}) translate(0,-86) scale(1.6)`, fill: i % 2 ? '#FFE36E' : '#FFFFFF' }, g);
+  }
+  function drawBasket(lv = 0) {
+    const g = bGfx;
+    const pile = work.pile; clear(g); gfxTf();
+    if (lv >= 4) ['#FF8FB8', '#FFE36E', '#8FD3FF', '#C9B6F2'].forEach((c, i) => el('ellipse', { cx: 0, cy: 10, rx: 70 - i * 6, ry: 46 - i * 5, fill: c, opacity: .4 }, g));
+    const gold = lv >= 3;
+    el('ellipse', { cx: 0, cy: -2, rx: 46, ry: 12, fill: gold ? '#C9A020' : '#8A5A2A', stroke: S.ink, 'stroke-width': 3 }, g);
+    work.pile = pile && pile.parentNode === null ? g.appendChild(pile) : (pile ? g.appendChild(pile) : el('g', {}, g));
+    el('path', { d: 'M-46 -2 L-38 30 Q0 40 38 30 L46 -2 Q0 12 -46 -2 Z', fill: gold ? '#FFD84D' : '#C98A4A', stroke: S.ink, 'stroke-width': 3, 'stroke-linejoin': 'round' }, g);
+    el('path', { d: 'M-42 10 Q0 22 42 10 M-40 20 Q0 32 40 20', fill: 'none', stroke: gold ? '#E0B830' : '#A06A30', 'stroke-width': 2.5 }, g);
+    if (lv >= 2) {
+      el('path', { d: 'M0 22 L-16 12 L-16 32 Z M0 22 L16 12 L16 32 Z', fill: '#FF6F91', stroke: S.ink, 'stroke-width': 2.5, 'stroke-linejoin': 'round' }, g);
+      el('circle', { cx: 0, cy: 22, r: 5, fill: '#FF8FB8', stroke: S.ink, 'stroke-width': 2 }, g);
+    }
+    if (gold) [[-30, 18], [28, 14]].forEach(([x, y]) => el('path', { d: STAR4, transform: `translate(${x},${y})`, fill: '#FFFFFF' }, g));
+    if (lv >= 6) [['#FF6F91', -22, 6], ['#8FD3FF', 0, 10], ['#7CC46A', 22, 6]].forEach(([c, x, y]) =>
+      el('path', { d: 'M0 -9 L7 0 L0 9 L-7 0 Z', transform: `translate(${x},${y})`, fill: c, stroke: S.ink, 'stroke-width': 2 }, g));
+    if (lv >= 8) el('ellipse', { cx: 0, cy: -26, rx: 50, ry: 12, fill: 'none', stroke: '#FFE36E', 'stroke-width': 6, opacity: .9 }, g);
+    if (lv >= 9) for (let i = 0; i < 8; i++)
+      el('path', { d: STAR4, transform: `translate(${-56 + i * 16},${i % 2 ? -40 : -34}) scale(1.4)`, fill: i % 2 ? '#FFE36E' : '#FFFFFF' }, g);
+  }
+  async function levelUp(lv) {
+    drawBasket(lv);
+    bigText(DATA.rush.levelUp, 40, 360);
+    [0, 4, 7, 12].forEach((s, i) => toneRaw(523 * Math.pow(2, (s + lv * 2) / 12), .18, 'triangle', .22, i * .07));
+    anim(bAnim, [{ transform: 'scale(1)' }, { transform: 'scale(1.25)' }, { transform: 'scale(1)' }], { duration: 400 });
+    for (let i = 0; i < 3; i++) setTimeout(() => burst(40 + Math.random() * 280, 180 + Math.random() * 300, CONFETTI, 12, 60), i * 120);
+  }
+  function twinkle() {
+    const x = 20 + Math.random() * 320, y = 140 + Math.random() * 420;
+    const g = el('g', { transform: `translate(${x},${y})` }, fx);
+    const s = el('path', { d: STAR4, fill: '#FFFFFF', class: 'a' }, g);
+    s.animate([{ transform: 'scale(0) rotate(0deg)', opacity: 0 }, { transform: 'scale(1.6) rotate(45deg)', opacity: 1 }, { transform: 'scale(0) rotate(90deg)', opacity: 0 }], { duration: 600 }).finished.then(() => g.remove());
+  }
+  function rushUI() {
+    const g = el('g', { id: 'rushUI' }, fx);
+    el('rect', { x: 30, y: 604, width: 300, height: 16, rx: 8, fill: '#5B3A7A', stroke: S.ink, 'stroke-width': 2 }, g);
+    work.bar = el('rect', { x: 30, y: 604, width: 300, height: 16, rx: 8, fill: S.glow }, g);
+    work.countT = el('text', { x: 290, y: 556, 'text-anchor': 'middle', 'font-size': 44, fill: S.cream, stroke: S.ink, 'stroke-width': 4, 'paint-order': 'stroke', class: 'a' }, g);
+    work.countT.textContent = '0';
+  }
+  async function startRush() {
+    state = 'busy';
+    rings(null); hint(null); drawDots(null); clear(under); clear(over);
+    work.count = 0; work.running = false; work.lastSec = 99; work.lv = 0; work.pile = null;
+    drawBasket(0); rushUI();
+    say(DATA.rush.say);
+    for (const n of [3, 2, 1]) { toneRaw(660, .15, 'triangle', .25); await bigText(String(n), 72); }
+    toneRaw(1320, .35, 'triangle', .3);
+    bigText(DATA.rush.go, 50);
+    work.running = true; work.t0 = performance.now();
+    state = 'play'; hint('wiggle');
+    rushTick();
+  }
+  function rushTick() {
+    if (!work.running) return;
+    const sec = DATA.rush.seconds;
+    const el2 = (performance.now() - work.t0) / 1000;
+    const f = Math.max(0, 1 - el2 / sec);
+    work.bar.setAttribute('width', 300 * f);
+    const left = Math.ceil(sec - el2);
+    if (left <= 3) work.bar.setAttribute('fill', '#FF6F6F');
+    if (left <= 3 && left < work.lastSec && left > 0) { toneRaw(1760, .06, 'square', .2); toneRaw(1760, .06, 'square', .2, .12); }
+    work.lastSec = left;
+    if (f <= 0) { endRush(); return; }
+    requestAnimationFrame(rushTick);
+  }
+  function rushOne(p) {
+    work.count++;
+    const n = work.count;
+    const lv = LV();
+    if (lv > work.lv) { work.lv = lv; levelUp(lv); }
+    const base = 440 * Math.pow(2, (n % 13) / 12);
+    toneRaw(base, .12, lv >= 1 ? 'triangle' : 'sine', .22, 0, base * 2);
+    if (lv >= 2) toneRaw(base * 1.5, .12, 'sine', .1, .02);                    // 和音
+    if (lv >= 3) toneRaw(base * 4, .18, 'sine', .07, .04);                     // キラッ
+    if (lv >= 4) toneRaw(base * 1.26, .12, 'sine', .1, .03);
+    if (lv >= 5) toneRaw(base * 2, .14, 'triangle', .08, .05);
+    if (lv >= 6) toneRaw(base * 2.52, .14, 'sine', .07, .07);
+    if (lv >= 7) toneRaw(base * 4, .2, 'sine', .06, .09);
+    if (lv >= 8) toneRaw(base * 3, .16, 'triangle', .06, .11);
+    if (lv >= 3 && Math.random() < .25 + lv * .05) twinkle();
+    work.countT.textContent = String(n);
+    work.countT.animate([{ transform: 'scale(1.3)' }, { transform: 'scale(1)' }], { duration: 160 });
+    const b = RUSH_POOL[(Math.random() * RUSH_POOL.length) | 0];
+    const slot = PILE[(n - 1) % PILE.length];
+    const target = toS({ x: slot[0], y: slot[1] });
+    const g = el('g', { transform: `translate(${p.x},${p.y})` }, fx);
+    const inner = el('g', { class: 'a' }, g);
+    drawMini(el('g', { transform: `scale(${lv >= 6 ? .3 : lv >= 4 ? .38 : .34})` }, inner), b, lv);
+    burst(p.x, p.y, lv >= 3 ? ['#FFE36E', '#FFFFFF', '#FFD84D'] : CONFETTI, 5 + lv * 2, 26 + lv * 6, 3);
+    const mx = (target.x - p.x) / 2, my = Math.min(target.y, p.y) - p.y - 60;
+    inner.animate([
+      { transform: 'translate(0,0) rotate(0deg) scale(1.3)' },
+      { transform: `translate(${mx}px,${my}px) rotate(180deg) scale(1.1)` },
+      { transform: `translate(${target.x - p.x}px,${target.y - p.y}px) rotate(360deg) scale(1)` }
+    ], { duration: 450, easing: 'ease-in' }).finished.then(() => {
+      g.remove();
+      if (work.pile) {
+        if (work.pile.childNodes.length >= PILE.length) work.pile.removeChild(work.pile.firstChild); // ふるいものと入れかえ
+        drawMini(el('g', { transform: `translate(${slot[0]},${slot[1]}) scale(${lv >= 6 ? .24 : .3})` }, work.pile), b, lv);
+      }
+      anim(bAnim, [{ transform: 'scale(1.06,.94)' }, { transform: 'scale(1)' }], { duration: 150 });
+    });
+  }
+  async function endRush() {
+    work.running = false; pointer = null; state = 'busy';
+    follower(null); hint(null); say('');
+    [880, 660, 880, 1175].forEach((f, i) => toneRaw(f, .18, 'square', .2, i * .12));
+    await bigText(DATA.rush.end, 50);
+    const ui = $('rushUI'); if (ui) ui.remove();
+    const n = work.count, isBest = n > rushBest;
+    if (isBest) { rushBest = n; try { localStorage.setItem(BEST_KEY, String(n)); } catch (e) {} }
+    // カゴごとわたす
+    const t = P.customer;
+    setPos(layer, t);
+    await anim(bAnim, [{ transform: `translate(${P.home.x - t.x}px,${P.home.y - t.y}px) scale(1)`, opacity: 1 },
+      { transform: 'translate(0,-10px) scale(.3)', opacity: 0 }], { duration: 650, easing: 'ease-in' });
+    setPos(layer, P.home);
+    // けっか
+    const g = el('g', {}, fx);
+    el('rect', { x: 60, y: 396, width: 240, height: isBest ? 160 : 128, rx: 24, fill: S.ink, stroke: S.cream, 'stroke-width': 3, opacity: .95 }, g);
+    const t1 = el('text', { x: 180, y: 470, 'text-anchor': 'middle', 'font-size': 48, fill: S.glow }, g);
+    t1.textContent = DATA.rush.count.replace('{n}', n);
+    const NL = DATA.rush.levels.length;
+    for (let i = 0; i < NL; i++)
+      el('path', { d: 'M0 -9 L2.6 -3 L9 -2.8 L4 1.4 L5.6 8 L0 4.4 L-5.6 8 L-4 1.4 L-9 -2.8 L-2.6 -3 Z', transform: `translate(${180 + (i - (NL - 1) / 2) * 22},418) scale(.8)`,
+        fill: i <= work.lv ? '#FFD84D' : 'none', stroke: i <= work.lv ? S.ink : S.cream, 'stroke-width': 1.5 }, g);
+    const t2 = el('text', { x: 180, y: 506, 'text-anchor': 'middle', 'font-size': 18, fill: S.cream }, g);
+    t2.textContent = DATA.rush.best.replace('{n}', rushBest);
+    if (isBest) {
+      const t3 = el('text', { x: 180, y: 540, 'text-anchor': 'middle', 'font-size': 22, fill: '#FF8FB8' }, g);
+      t3.textContent = DATA.rush.newBest;
+      SFX.fanfare();
+      for (let i = 0; i < 3; i++) setTimeout(() => burst(90 + Math.random() * 180, 420 + Math.random() * 80, CONFETTI, 12, 60), i * 250);
+    } else SFX.yay();
+    g.animate([{ opacity: 0, transform: 'translateY(20px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 300 });
+    await wait(2000);
+    g.remove();
+    await eat();
+  }
+
+  /* ---- オーブンのアクション ---- */
+  function ovenReset() {
+    ['ovenDoor', 'ovenBtn', 'dial', 'lever', 'ovenGlass', 'ovenBread'].forEach(id => show(id, false));
+    clear($('ovenFire'));
+    $('ovenDoorA').getAnimations().forEach(a => a.cancel());
+    $('dialRot').setAttribute('transform', 'rotate(0)');
+    $('leverArm').setAttribute('transform', 'rotate(-15)');
+    $('ovenGlow').getAnimations().forEach(a => a.cancel());
+    $('ovenGlow').setAttribute('opacity', .15);
+  }
+  function setupBake(s) {
+    work.acc = 0; work.rot = 0; progress = 0;
+    if (s.how === 'door') { show('ovenDoor', true); hint('press', OV.door); }
+    if (s.how === 'dial') { show('dial', true); show('ovenGlass', true); drawDots(0); hint('circle', OV.knob, 26); }
+    if (s.how === 'fire') { show('ovenGlass', true); drawDots(0); hint('press', OV.body); }
+    if (s.how === 'button') { show('ovenBtn', true); show('ovenGlass', true); hint('press', OV.btn); }
+    if (s.how === 'lever') { show('lever', true); show('ovenGlass', true); hint('swipe', OV.lever, OV.leverDown); }
+    rings('oven');
+  }
+  const FLAME = 'M0 0 Q-9 -6 -4 -16 Q-2 -10 0 -9 Q0 -20 6 -24 Q4 -14 9 -8 Q9 0 0 0 Z';
+  function bakeDown(s, p) {
+    if (s.how === 'door' && dist(p, OV.door) < 60) {
+      state = 'busy'; hint(null);
+      SFX.stamp();
+      $('ovenDoorA').animate([{ transform: 'scaleY(1)' }, { transform: 'scaleY(-1)' }], { duration: 260, easing: 'ease-in', fill: 'forwards' })
+        .finished.then(() => { show('ovenDoor', false); show('ovenGlass', true); SFX.pechi(0); ringWave(OV.body.x, OV.body.y); bakeDone(); });
+    } else if (s.how === 'fire' && dist(p, OV.body) < 80) {
+      hint(null);
+      progress++;
+      const x = 290 + (progress - 2) * 18;
+      const g = el('g', { transform: `translate(${x},352)` }, $('ovenFire'));
+      const inner = el('g', { class: 'a' }, g);
+      el('path', { d: FLAME, fill: '#FF7A3D', stroke: S.ink, 'stroke-width': 1.5 }, inner);
+      el('path', { d: 'M0 0 Q-4 -4 -1 -9 Q2 -5 4 -4 Q4 0 0 0 Z', fill: '#FFE36E' }, inner);
+      inner.animate([{ transform: 'scale(0)' }, { transform: 'scale(1.4)' }, { transform: 'scale(1)' }], { duration: 300, fill: 'forwards' });
+      noise(.25, .25, 700); tone(180, .2, 'triangle', .15, 0, 360);
+      $('ovenGlow').setAttribute('opacity', .15 + .25 * progress);
+      burst(x, 340, ['#FF7A3D', '#FFE36E'], 6, 24, 3);
+      drawDots(progress / s.count);
+      if (progress >= s.count) { state = 'busy'; setTimeout(bakeDone, 350); }
+    } else if (s.how === 'dial' && dist(p, OV.knob) < 85) {
+      hint(null);
+      pointer = { mode: 'dial', lastA: Math.atan2(p.y - OV.knob.y, p.x - OV.knob.x), acc: 0 };
+    } else if (s.how === 'button' && dist(p, OV.btn) < 45) {
+      hint(null);
+      pointer = { mode: 'btn', t0: performance.now() };
+      $('ovenBtnA').animate([{ transform: 'scale(1)' }, { transform: 'scale(.85)' }], { duration: 120, fill: 'forwards' });
+      SFX.squeeze();
+      btnTick();
+    } else if (s.how === 'lever' && dist(p, OV.lever) < 60) {
+      hint(null);
+      pointer = { mode: 'lever', y0: p.y };
+    }
+  }
+  function btnTick() {
+    if (!pointer || pointer.mode !== 'btn') return;
+    const s = cur();
+    const f = Math.min(1, (performance.now() - pointer.t0) / s.ms);
+    $('ovenGlow').setAttribute('opacity', .15 + .8 * f);
+    drawDots(f);
+    if (f >= 1) { pointer = null; SFX.pop(); bakeDone(); return; }
+    requestAnimationFrame(btnTick);
+  }
+  async function bakeDone() {
+    state = 'busy'; hint(null); rings(null); drawDots(null);
+    await runBake();
+    si++;
+    beginStep();
+  }
+  async function runBake() {
+    const t = P.oven;
+    say(T.baking);
+    SFX.rumble();
+    $('ovenGlow').animate([{ opacity: .5 }, { opacity: .95 }, { opacity: .6 }, { opacity: .95 }], { duration: 1500, fill: 'forwards' });
+    $('ovenBread').animate([{ transform: 'translate(290px,326px) scale(.55)' }, { transform: 'translate(290px,326px) scale(.66)' }],
+      { duration: 1500, fill: 'forwards', easing: 'ease-out' });
+    await anim($('ovenBody'), [
+      { transform: 'translate(0,0)' }, { transform: 'translate(-2px,0)' }, { transform: 'translate(2px,0)' },
+      { transform: 'translate(-2px,0)' }, { transform: 'translate(2px,0)' }, { transform: 'translate(0,0)' }
+    ], { duration: 1500 });
+    SFX.ding();
+    burst(t.x, t.y - 25, ['#FFFFFF', S.cream], 8, 45);
+    baked = true; redraw();
+    $('ovenBread').getAnimations().forEach(a => a.cancel());
+    ovenReset();
+    setPos(layer, P.home);
+    await anim(bAnim, [
+      { transform: `translate(${t.x - P.home.x}px,${t.y - P.home.y}px) scale(.4)`, opacity: 0 },
+      { transform: 'translate(0,0) scale(1.2)', opacity: 1, offset: .8 },
+      { transform: 'translate(0,0) scale(1)', opacity: 1 }
+    ], { duration: 700, easing: 'ease-out' });
+    burst(P.home.x, P.home.y, [S.glow, S.cream], 10, 70);
+    await wait(300);
+  }
+
+  async function eat() {
+    SND = SND_DEFAULT;
+    SFX.paku();
+    drawCustomer($('custGfx'), cust, 'happy');
+    anim($('bubble'), [{ transform: 'scale(1)', opacity: 1 }, { transform: 'scale(0)', opacity: 0 }], { duration: 250 });
+    anim($('custAnim'), [{ transform: 'scale(1)', opacity: 1 }, { transform: 'scale(1.18,.86)', opacity: 1 }, { transform: 'scale(1)', opacity: 1 }], { duration: 400 });
+    hearts(95, 200);
+    say(T.thanks);
+    await wait(700);
+    await giveSticker();
+    await wait(300);
+    SFX.whoosh();
+    await anim($('custAnim'), [
+      { transform: 'translate(0,0) rotate(0deg) scale(1)', opacity: 1 },
+      { transform: 'translate(-10px,-30px) rotate(360deg) scale(.4)', opacity: 0 }
+    ], { duration: 800, easing: 'ease-in' });
+    step++;
+    if (step >= ORDERS.length) return finish();
+    if (step % COLS === 0) { await rowCelebrate(step / COLS - 1); return setBreak(step / COLS); }
+    nextCustomer();
+  }
+
+  async function giveSticker() {
+    const idx = step % COLS, row = Math.floor(step / COLS);
+    const p = slotPos(idx, row);
+    const holder = el('g', { transform: 'translate(95,250)' }, fx);
+    const inner = el('g', { class: 'a' }, holder);
+    makeSticker(inner, cust);
+    SFX.kira();
+    await inner.animate([
+      { transform: 'translate(0,0) scale(1.6)' },
+      { transform: `translate(${p.x - 95}px,${p.y - 250}px) scale(1)` }
+    ], { duration: 800, easing: 'cubic-bezier(.4,0,.3,1)', fill: 'forwards' }).finished;
+    holder.remove();
+    const placed = el('g', { transform: `translate(${p.x},${p.y})`, class: 'sticker', 'data-row': row }, $('board'));
+    const pi = el('g', { class: 'a' }, placed);
+    makeSticker(pi, cust);
+    pi.animate([{ transform: 'scale(1.5)' }, { transform: 'scale(1)' }], { duration: 300 });
+    burst(p.x, p.y, [S.glow, S.cream, '#FFFFFF'], 8, 26);
+  }
+
+  async function rowCelebrate(row) {
+    say(T.row);
+    SFX.yay();
+    const ss = [...$('board').querySelectorAll(`.sticker[data-row="${row}"] > g`)];
+    ss.forEach((g, i) => g.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.6)' }, { transform: 'scale(1)' }], { duration: 450, delay: i * 90 }));
+    for (let i = 0; i < COLS; i++) { const p = slotPos(i, row); setTimeout(() => burst(p.x, p.y, CONFETTI, 8, 30), i * 90); }
+    await wait(1400);
+  }
+
+  // 1セット(5人)おわりのくぎり
+  function setBreak(n) {
+    say('');
+    $('setText').textContent = T.setDone.replace('{n}', n);
+    const g = $('setGhosts'); clear(g);
+    ORDERS.slice((n - 1) * COLS, n * COLS).map(o => byId(ALL_CUSTOMERS, o.customer)).forEach((c, i) => {
+      const w = el('g', { transform: `translate(${44 + i * 68},310)` }, g);
+      const inner = el('g', { class: 'a' }, w);
+      drawCustomer(el('g', { transform: `scale(${0.62 * (c.size || 1)})` }, inner), c, 'happy');
+      inner.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-12px)' }, { transform: 'translateY(0)' }],
+        { duration: 600, iterations: Infinity, delay: i * 90, easing: 'ease-in-out' });
+    });
+    show('setScreen', true);
+    $('setScreen').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300 });
+    state = 'set';
+  }
+  function showEnd(text) {
+    $('clearText').textContent = text;
+    show('endScreen', true);
+    state = 'end';
+  }
+
+  async function finish() {
+    state = 'busy';
+    say(T.finale);
+    rings(null); hint(null);
+    SFX.fanfare();
+    const party = el('g', { id: 'party' }, fx);
+    ORDERS.slice(-COLS).map(o => byId(ALL_CUSTOMERS, o.customer)).forEach((c, i) => {
+      const x = 44 + i * 68;
+      const g = el('g', { transform: `translate(${x},330)` }, party);
+      const inner = el('g', { class: 'a' }, g);
+      drawCustomer(el('g', { transform: `scale(${0.72 * (c.size || 1)})` }, inner), c, 'happy');
+      inner.animate([{ transform: 'translateY(40px) scale(0)', opacity: 0 }, { transform: 'translateY(0) scale(1)', opacity: 1 }],
+        { duration: 500, delay: i * 150, fill: 'forwards', easing: 'cubic-bezier(.3,1.6,.5,1)' })
+        .finished.then(() => inner.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-18px)' }, { transform: 'translateY(0)' }],
+          { duration: 500, iterations: Infinity, delay: i * 80, easing: 'ease-in-out' }));
+    });
+    for (let i = 0; i < 8; i++) { burst(40 + Math.random() * 280, 150 + Math.random() * 280, CONFETTI, 14, 80); await wait(300); }
+    await wait(800);
+    showEnd(T.clear);
+  }
+
+  function reset() {
+    step = 0;
+    if (!DATA.orders) ORDERS = makeOrders();
+    $('board').querySelectorAll('.sticker').forEach(n => n.remove());
+    const party = $('party'); if (party) party.remove();
+    show('endScreen', false); show('setScreen', false);
+    nextCustomer();
+  }
+
+  /* ---------------- はじめる ---------------- */
+  $('titleText').textContent = T.title;
+  $('subText').textContent = T.sub;
+  $('startText').textContent = T.start;
+  $('clearText').textContent = T.clear;
+  $('againText').textContent = T.again;
+  $('contText').textContent = T.cont;
+  $('stopText').textContent = T.stop;
+  drawGhost($('titleGhost'), DATA.shopkeeper, 'smile');
+  buildBoard();
+
+  $('titleScreen').addEventListener('pointerdown', async () => {
+    if (state !== 'title') return;
+    state = 'starting';
+    audio(); SFX.pop();
+    await anim($('titleScreen'), [{ opacity: 1 }, { opacity: 0 }], { duration: 400 });
+    show('titleScreen', false);
+    nextCustomer();
+  });
+  svg.addEventListener('pointerdown', onDown);
+  window.addEventListener('pointermove', onMove);
+  window.addEventListener('pointerup', onUp);
+  window.addEventListener('pointercancel', onUp);
+  $('contBtn').addEventListener('pointerdown', () => {
+    if (state !== 'set') return;
+    state = 'busy'; SFX.pop();
+    show('setScreen', false);
+    nextCustomer();
+  });
+  $('stopBtn').addEventListener('pointerdown', () => {
+    if (state !== 'set') return;
+    SFX.pop();
+    show('setScreen', false);
+    showEnd(T.bye);
+  });
+  $('endScreen').addEventListener('pointerdown', () => { if (state === 'end') { SFX.pop(); reset(); } });
+
+  // 自動テスト用
+  window.__game = {
+    get state() { return state; }, get step() { return step; }, get si() { return si; },
+    get stepInfo() { return bread && bread.steps[si]; }, get bread() { return bread && bread.id; },
+    get total() { return ORDERS.length; }, places: P,
+    get guides() { return work.guides ? work.guides.map(g => g.pts.map(toS)) : null; },
+    get guideIndex() { return work.gi; }, oven: OV, get orders() { return ORDERS; }, get rushCount() { return work.count; }, get rushLv() { return work.lv; }, miniGallery() { const g = el('g', { id: 'gal' }, svg); el('rect', { x: -400, y: -200, width: 1160, height: 1040, fill: '#43295F' }, g);
+      DATA.rush.levels.forEach((t, lv) => { const w = el('g', { transform: `translate(${60 + (lv % 3) * 120},${110 + ((lv / 3) | 0) * 160}) scale(.42)` }, g);
+        drawMini(w, RUSH_POOL[lv % RUSH_POOL.length], lv);
+        const tx = el('text', { x: 0, y: 150, 'text-anchor': 'middle', 'font-size': 40, fill: '#FFE7B8' }, w); tx.textContent = t + 'こ'; }); }, gallery(mood) { const g = el('g', { id: 'gal' }, svg); el('rect', { x: -400, y: -200, width: 1160, height: 1040, fill: '#43295F' }, g); ALL_CUSTOMERS.forEach((c, i) => { const w = el('g', { transform: `translate(${60 + (i % 4) * 80},${80 + Math.floor(i / 4) * 140})` }, g); drawCustomer(el('g', { transform: `scale(${0.75 * (c.size || 1)})` }, w), c, mood); makeSticker(el('g', { transform: 'translate(0,70)' }, w), c); }); }, get best() { return rushBest; },
+    spot(i) { const s = bread.steps[si]; return toS({ x: s.spots[i][0], y: s.spots[i][1] }); }
+  };
+})();
+</script>
+</body>
+</html>
