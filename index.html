@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ゲームのへや</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=M+PLUS+Rounded+1c:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#1c1536;
+  --plum:#2a1b55;
+  --ink:#fff7ea;
+  --amber:#ffc24a;
+  --amber-deep:#e08a1e;
+  --exit:#5ff0a0;
+  --f-disp:'Dela Gothic One','Hiragino Sans','Yu Gothic',sans-serif;
+  --f-ui:'M PLUS Rounded 1c','Hiragino Maru Gothic ProN','Hiragino Sans','Yu Gothic',sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--night);color:var(--ink);font-family:var(--f-ui);-webkit-tap-highlight-color:transparent}
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(ellipse at 20% 0%,rgba(255,194,74,.14),transparent 55%),
+    radial-gradient(ellipse at 90% 100%,rgba(95,240,160,.10),transparent 50%),
+    var(--night);
+  padding:calc(28px + env(safe-area-inset-top,0px)) max(18px,env(safe-area-inset-right,0px)) calc(40px + env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-left,0px));
+}
+.wrap{max-width:760px;margin:0 auto}
+header{text-align:center;padding:18px 0 26px}
+.kicker{font-size:13px;letter-spacing:.3em;color:var(--exit);margin:0 0 8px}
+h1{margin:0;font:400 clamp(38px,9vw,64px)/1.1 var(--f-disp);color:var(--amber);text-shadow:0 5px 0 #6b3500,0 10px 26px rgba(0,0,0,.5)}
+.lead{margin:14px 0 0;font-size:16px;color:rgba(255,247,234,.85)}
+.games{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;list-style:none;margin:0;padding:0}
+.card{
+  display:flex;flex-direction:column;gap:12px;height:100%;
+  text-decoration:none;color:var(--ink);
+  background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,255,255,.04));
+  border:2px solid rgba(255,255,255,.2);border-radius:22px;padding:14px 14px 16px;
+  transition:transform .15s,border-color .15s,box-shadow .15s;
+}
+.card:hover{border-color:var(--amber);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.card:active{transform:scale(.98)}
+.card:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
+.thumb{
+  border-radius:14px;overflow:hidden;aspect-ratio:16/9;
+  background:linear-gradient(180deg,#3b2a78,#1c1536);
+  display:grid;place-items:center;
+}
+.thumb svg{width:100%;height:100%;display:block}
+.name{margin:0;font:400 26px/1.2 var(--f-disp);color:var(--amber)}
+.en{margin:-6px 0 0;font-size:12px;letter-spacing:.2em;color:rgba(255,247,234,.6)}
+.desc{margin:0;font-size:15px;line-height:1.6;color:rgba(255,247,234,.92)}
+.play{
+  margin-top:auto;align-self:flex-start;
+  font:800 17px var(--f-ui);color:#3d1f00;
+  background:linear-gradient(#ffd877,var(--amber) 55%,var(--amber-deep));
+  border:3px solid #fff;border-radius:999px;padding:8px 26px;
+  box-shadow:0 5px 0 #8a4e0c,0 10px 18px rgba(0,0,0,.35);
+}
+footer{margin-top:34px;text-align:center;font-size:13px;color:rgba(255,247,234,.55)}
+@media (prefers-reduced-motion:reduce){.card{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="kicker">GAME ROOM</p>
+    <h1>ゲームのへや</h1>
+    <p class="lead">あそびたいゲームを えらんで タップしてね</p>
+  </header>
+
+  <main>
+    <ul class="games">
+      <!-- ゲームを増やすときは、下の <li> ひとかたまりをコピーして追加する -->
+      <li>
+        <a class="card" href="dasshutsu-biru.html">
+          <div class="thumb" aria-hidden="true">
+            <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+              <rect width="320" height="180" fill="#2a1b55"/>
+              <circle cx="262" cy="36" r="16" fill="#fff7ea" opacity=".9"/>
+              <circle cx="269" cy="31" r="14" fill="#2a1b55"/>
+              <g fill="#fff7ea" opacity=".8">
+                <circle cx="40" cy="30" r="1.8"/><circle cx="92" cy="18" r="1.4"/><circle cx="150" cy="38" r="1.8"/><circle cx="210" cy="16" r="1.4"/><circle cx="300" cy="78" r="1.6"/>
+              </g>
+              <rect x="95" y="34" width="130" height="146" rx="6" fill="#3d2d82"/>
+              <rect x="95" y="34" width="130" height="10" rx="4" fill="#4d3b9c"/>
+              <g fill="#ffc24a">
+                <rect x="109" y="56" width="22" height="18" rx="3"/><rect x="149" y="56" width="22" height="18" rx="3" opacity=".35"/><rect x="189" y="56" width="22" height="18" rx="3"/>
+                <rect x="109" y="88" width="22" height="18" rx="3" opacity=".35"/><rect x="149" y="88" width="22" height="18" rx="3"/><rect x="189" y="88" width="22" height="18" rx="3" opacity=".35"/>
+                <rect x="109" y="120" width="22" height="18" rx="3"/><rect x="189" y="120" width="22" height="18" rx="3"/>
+              </g>
+              <rect x="146" y="140" width="28" height="40" rx="4" fill="#5ff0a0"/>
+              <rect x="150" y="146" width="20" height="34" rx="2" fill="#1c1536" opacity=".35"/>
+              <path d="M160 128 l-9 -10 h5 v-8 h8 v8 h5 z" fill="#5ff0a0"/>
+            </svg>
+          </div>
+          <h2 class="name">だっしゅつビル</h2>
+          <p class="en">ESCAPE THE TOWER</p>
+          <p class="desc">つかまった なかまを たすけながら、ビルの そとへ にげだそう！</p>
+          <span class="play">あそぶ</span>
+        </a>
+      </li>
+    </ul>
+  </main>
+
+  <footer>つぎの ゲームも じゅんびちゅう</footer>
+</div>
+</body>
+</html>
