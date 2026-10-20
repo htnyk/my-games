@@ -202,7 +202,7 @@ function audioInit(){
 const now=()=>AU.ctx?AU.ctx.currentTime:0;
 /* recorded songs: お菓子の森 / お化け屋敷 course songs and the ウサ2 theme song.
    Fetched at load, decoded after the first tap, looped without the silent tail. */
-const TR={files:{forest:'audio/okashi.mp3',mansion:'audio/obake.mp3',theme:'audio/theme.mp3',sea:'audio/sea.mp3',sky:'audio/sky.mp3',boss:'audio/boss.mp3',final:'audio/final.mp3',fboss:'audio/fboss.mp3',title:'audio/title.mp3'},raw:{},buf:{},off:{},dec:{},keep:new Set(['title']),src:null,g:null,cur:null,want:null,bus:null,vol:0.42,startAt:0};
+const TR={files:{forest:'yuusha-usa-2-audio/okashi.mp3',mansion:'yuusha-usa-2-audio/obake.mp3',theme:'yuusha-usa-2-audio/theme.mp3',sea:'yuusha-usa-2-audio/sea.mp3',sky:'yuusha-usa-2-audio/sky.mp3',boss:'yuusha-usa-2-audio/boss.mp3',final:'yuusha-usa-2-audio/final.mp3',fboss:'yuusha-usa-2-audio/fboss.mp3',title:'yuusha-usa-2-audio/title.mp3'},raw:{},buf:{},off:{},dec:{},keep:new Set(['title']),src:null,g:null,cur:null,want:null,bus:null,vol:0.42,startAt:0};
 for(const k in TR.files){try{fetch(TR.files[k]).then(r=>r.ok?r.arrayBuffer():null).then(ab=>{if(ab){TR.raw[k]=ab;if(TR.keep.has(k)||TR.want===k)decodeTrack(k);}}).catch(()=>{});}catch(e){}}
 function decodeTrack(k){ /* 必要な曲だけデコードする（スマホのメモリ節約）。圧縮データは残しておく */
   if(!AU.ctx||!TR.raw[k]||TR.buf[k]||TR.dec[k])return;TR.dec[k]=true;const ab=TR.raw[k].slice(0);

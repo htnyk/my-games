@@ -50,12 +50,7 @@ h1{margin:0;font:400 clamp(38px,9vw,64px)/1.1 var(--f-disp);color:var(--amber);t
   background:linear-gradient(180deg,#3b2a78,#1c1536);
   display:grid;place-items:center;
 }
-.thumb svg{width:100%;height:100%;display:block}
-.thumb.emoji{font-size:clamp(44px,12vw,60px);line-height:1;letter-spacing:.08em;text-shadow:0 4px 12px rgba(0,0,0,.35)}
-.thumb.t-usa2{background:linear-gradient(180deg,#2c5aa0,#1c1536)}
-.thumb.t-usa3{background:linear-gradient(180deg,#4a3a9e,#120b2c)}
-.thumb.t-panya{background:linear-gradient(180deg,#6a3a1c,#2a1b47)}
-.thumb.t-banchou{background:linear-gradient(180deg,#2f7a4a,#17301f)}
+.thumb img{width:100%;height:100%;display:block;object-fit:cover}
 .name{margin:0;font:400 26px/1.2 var(--f-disp);color:var(--amber)}
 .en{margin:-6px 0 0;font-size:12px;letter-spacing:.2em;color:rgba(255,247,234,.6)}
 .desc{margin:0;font-size:15px;line-height:1.6;color:rgba(255,247,234,.92)}
@@ -83,26 +78,7 @@ footer{margin-top:34px;text-align:center;font-size:13px;color:rgba(255,247,234,.
       <!-- ゲームを増やすときは、下の <li> ひとかたまりをコピーして追加する -->
       <li>
         <a class="card" href="dasshutsu-biru.html">
-          <div class="thumb" aria-hidden="true">
-            <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
-              <rect width="320" height="180" fill="#2a1b55"/>
-              <circle cx="262" cy="36" r="16" fill="#fff7ea" opacity=".9"/>
-              <circle cx="269" cy="31" r="14" fill="#2a1b55"/>
-              <g fill="#fff7ea" opacity=".8">
-                <circle cx="40" cy="30" r="1.8"/><circle cx="92" cy="18" r="1.4"/><circle cx="150" cy="38" r="1.8"/><circle cx="210" cy="16" r="1.4"/><circle cx="300" cy="78" r="1.6"/>
-              </g>
-              <rect x="95" y="34" width="130" height="146" rx="6" fill="#3d2d82"/>
-              <rect x="95" y="34" width="130" height="10" rx="4" fill="#4d3b9c"/>
-              <g fill="#ffc24a">
-                <rect x="109" y="56" width="22" height="18" rx="3"/><rect x="149" y="56" width="22" height="18" rx="3" opacity=".35"/><rect x="189" y="56" width="22" height="18" rx="3"/>
-                <rect x="109" y="88" width="22" height="18" rx="3" opacity=".35"/><rect x="149" y="88" width="22" height="18" rx="3"/><rect x="189" y="88" width="22" height="18" rx="3" opacity=".35"/>
-                <rect x="109" y="120" width="22" height="18" rx="3"/><rect x="189" y="120" width="22" height="18" rx="3"/>
-              </g>
-              <rect x="146" y="140" width="28" height="40" rx="4" fill="#5ff0a0"/>
-              <rect x="150" y="146" width="20" height="34" rx="2" fill="#1c1536" opacity=".35"/>
-              <path d="M160 128 l-9 -10 h5 v-8 h8 v8 h5 z" fill="#5ff0a0"/>
-            </svg>
-          </div>
+          <div class="thumb"><img src="thumbs/dasshutsu-biru.jpg" alt="" width="640" height="360" loading="lazy" decoding="async"></div>
           <h2 class="name">だっしゅつビル</h2>
           <p class="en">ESCAPE THE TOWER</p>
           <p class="desc">つかまった なかまを たすけながら、ビルの そとへ にげだそう！</p>
@@ -111,7 +87,7 @@ footer{margin-top:34px;text-align:center;font-size:13px;color:rgba(255,247,234,.
       </li>
       <li>
         <a class="card" href="yuusha-usa-2.html">
-          <div class="thumb emoji t-usa2" aria-hidden="true">🐰🌍</div>
+          <div class="thumb"><img src="thumbs/yuusha-usa-2.jpg" alt="" width="640" height="360" loading="lazy" decoding="async"></div>
           <h2 class="name">勇者ウサの大冒険2</h2>
           <p class="en">ちきゅうへん</p>
           <p class="desc">おもちの かけらを 5こ あつめて、つきの うさぎたちに とどけよう！ つかまった なかまも たすけてね。</p>
@@ -120,7 +96,7 @@ footer{margin-top:34px;text-align:center;font-size:13px;color:rgba(255,247,234,.
       </li>
       <li>
         <a class="card" href="yuusha-usa-3.html">
-          <div class="thumb emoji t-usa3" aria-hidden="true">🐰🌕</div>
+          <div class="thumb"><img src="thumbs/yuusha-usa-3.jpg" alt="" width="640" height="360" loading="lazy" decoding="async"></div>
           <h2 class="name">勇者ウサの大冒険3</h2>
           <p class="en">つきまで おもちを はこぼう</p>
           <p class="desc">ゆびで なぞって ウサを うごかして、つきまで おもちを はこぼう！</p>
@@ -129,7 +105,7 @@ footer{margin-top:34px;text-align:center;font-size:13px;color:rgba(255,247,234,.
       </li>
       <li>
         <a class="card" href="obake-panya.html">
-          <div class="thumb emoji t-panya" aria-hidden="true">🥖👻</div>
+          <div class="thumb"><img src="thumbs/obake-panya.jpg" alt="" width="640" height="360" loading="lazy" decoding="async"></div>
           <h2 class="name">おばけの パンやさん</h2>
           <p class="en">HALLOWEEN BAKERY</p>
           <p class="desc">よるの パンやさんに おばけの おきゃくさんが やってくる！ パンを つくって だしてあげよう。</p>
@@ -138,7 +114,7 @@ footer{margin-top:34px;text-align:center;font-size:13px;color:rgba(255,247,234,.
       </li>
       <li>
         <a class="card" href="reiwa-doubutsu-banchou.html">
-          <div class="thumb emoji t-banchou" aria-hidden="true">🦁🍖</div>
+          <div class="thumb"><img src="thumbs/reiwa-doubutsu-banchou.jpg" alt="" width="640" height="360" loading="lazy" decoding="async"></div>
           <h2 class="name">れいわ どうぶつ ばんちょう</h2>
           <p class="en">REIWA ANIMAL BANCHO</p>
           <p class="desc">どうぶつを たべて そだって、めざせ ばんちょう！ ゆびで なぞって うごくよ。</p>
